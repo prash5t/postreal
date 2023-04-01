@@ -12,11 +12,13 @@ Social media app that only allows you to post photos from your camera, not from 
 - Like/Comment on Posts
 - Get connected with other users
 
-##### Works left to do:
+##### Tasks more to do:
 
 - Add more features like notification, navigation
 - Optimize code, refactor, implement local storage caching
 - Publish to Google Play Store
+- Your PR's or any form of contribution will be acknowledged.
+- For any purpose: hello@ghimireprashant.com.np
 
 ##### Integrated Services:
 
