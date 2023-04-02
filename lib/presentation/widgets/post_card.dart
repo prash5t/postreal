@@ -6,9 +6,9 @@ import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/post.dart';
-import 'package:postreal/presentation/shared_layout/comments_screen.dart';
 import 'package:postreal/presentation/shared_layout/profile_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/comments_buttom_sheet.dart';
 import 'package:postreal/presentation/widgets/like_animation.dart';
 import 'package:postreal/utils/date_to_string.dart';
 import 'package:provider/provider.dart';
@@ -119,9 +119,11 @@ class _PostCardState extends State<PostCard> {
                     isAnimating: isLikeAnimating,
                     duration: const Duration(milliseconds: 400),
                     onEnd: () {
-                      setState(() {
-                        isLikeAnimating = false;
-                      });
+                      if (mounted) {
+                        setState(() {
+                          isLikeAnimating = false;
+                        });
+                      }
                     },
                     child: const Icon(
                       Icons.favorite,
@@ -156,13 +158,10 @@ class _PostCardState extends State<PostCard> {
               ),
               IconButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => CommentsScreen(
-                          postData: widget.postData,
-                        ),
-                      ),
-                    );
+                    commentsButtomSheet(
+                        context: context,
+                        post: widget.postData,
+                        currentUserId: user.uid);
                   },
                   icon: const Icon(Icons.comment_outlined)),
               // IconButton(
@@ -172,7 +171,6 @@ class _PostCardState extends State<PostCard> {
               isEligibleToDeletePost
                   ? IconButton(
                       onPressed: () async {
-                        // bool? shouldDeletePost = false;
                         bool? shouldDeletePost = await booleanBottomSheet(
                             context: context,
                             titleText: deletePostTitle,
@@ -196,7 +194,7 @@ class _PostCardState extends State<PostCard> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: likesCount == 0
-                ? const SizedBox()
+                ? const Text("")
                 : Text(
                     likesCount == 1 ? "1 like" : "$likesCount likes",
                     style: const TextStyle(
@@ -243,15 +241,15 @@ class _PostCardState extends State<PostCard> {
                 if (snapshot.connectionState == ConnectionState.waiting ||
                     snapshot.hasError ||
                     snapshot.data!.docs.isEmpty) {
-                  return const SizedBox();
+                  return const Text("");
                 }
 
                 return InkWell(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => CommentsScreen(
-                              postData: widget.postData,
-                            )));
+                    commentsButtomSheet(
+                        context: context,
+                        post: widget.postData,
+                        currentUserId: user.uid);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

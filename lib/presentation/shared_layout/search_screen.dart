@@ -1,7 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:postreal/data/models/post.dart';
 import 'package:postreal/presentation/shared_layout/profile_screen.dart';
+import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
+import 'package:postreal/providers/user_provider.dart';
+import 'package:provider/provider.dart';
+
+import '../../data/models/user.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -22,6 +28,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final User loggedInUser = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -118,18 +125,25 @@ class _SearchScreenState extends State<SearchScreen> {
                       return StaggeredGridView.countBuilder(
                         crossAxisCount: 3,
                         itemCount: postSnapshot.data!.docs.length,
-                        itemBuilder: (context, index) => Container(
-                          color: Colors.grey,
-                          child: InkWell(
-                            onTap: () {
-                              debugPrint("hulu");
-                            },
-                            child: Image.network(
-                              postSnapshot.data!.docs[index]['postPicUrl'],
-                              fit: BoxFit.cover,
+                        itemBuilder: (context, index) {
+                          Post post =
+                              Post.fromSnap(postSnapshot.data!.docs[index]);
+                          return Container(
+                            color: Colors.grey,
+                            child: InkWell(
+                              onTap: () {
+                                postModalBottomSheet(
+                                    context: context,
+                                    post: post,
+                                    currentUserId: loggedInUser.uid);
+                              },
+                              child: Image.network(
+                                post.postPicUrl,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                         staggeredTileBuilder: (index) => StaggeredTile.count(
                             (index % 7 == 0) ? 2 : 1, (index % 7 == 0) ? 2 : 1),
                         mainAxisSpacing: 2,

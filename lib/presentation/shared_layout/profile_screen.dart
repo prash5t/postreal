@@ -8,9 +8,11 @@ import 'package:postreal/business_logic/editprofile_bloc/editprofile_bloc.dart';
 import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/constants/routes.dart';
 import 'package:postreal/data/firestore_methods.dart';
+import 'package:postreal/data/models/post.dart';
 import 'package:postreal/data/models/user.dart';
 import 'package:postreal/presentation/shared_layout/edit_profile.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 
@@ -245,13 +247,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   mainAxisSpacing: 1,
                                   childAspectRatio: 1),
                           itemBuilder: ((context, index) {
-                            DocumentSnapshot postData =
-                                snapshot.data!.docs[index];
-                            return Image(
-                              image: NetworkImage(
-                                postData['postPicUrl'],
+                            Post post =
+                                Post.fromSnap(snapshot.data!.docs[index]);
+                            return GestureDetector(
+                              onTap: () {
+                                postModalBottomSheet(
+                                    context: context,
+                                    post: post,
+                                    currentUserId: loggedInUser.uid);
+                              },
+                              child: Image(
+                                image: NetworkImage(
+                                  post.postPicUrl,
+                                ),
+                                fit: BoxFit.cover,
                               ),
-                              fit: BoxFit.cover,
                             );
                           }));
                     }))
