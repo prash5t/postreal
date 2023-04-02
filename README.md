@@ -40,23 +40,26 @@ android, ios, web, windows, macos directories are git ignored. So you need to cr
 
 - First be inside project directory (postreal)
 - Run below commands
-  ```
+
   # to create ios directory
+
   flutter create -i swift .
+
   # to create android directory
+
   flutter create -a kotlin .
-  ```
+
 - If you are going to run in ios, you need to specify camera and photo library permission to Info.plist file.
 - Info.plist is located at ios/Runner/Info.plist
 - Below is the key/string values that you need to add within the 'dict' tag of Info.plist file
-  ```
+
   <key>NSPhotoLibraryUsageDescription</key>
   <string>Photo Library Usage</string>
   <key>NSCameraUsageDescription</key>
   <string>Camera Usage</string>
   <key>NSMicrophoneUsageDescription</key>
   <string>Microphone Usage</string>
-  ```
+
 - Now after specifying ios permission requirements, you need to configure Firebase to this project.
 - Add your own firebase_options.dart file which consists of your Firebase keys and configs inside lib directory. You can do this step by reading any docs of configuring Firebase with Flutter.
 - For ios, you also need GoogleService-Info.plist file. You can get this file from Firebase Console inside ios app section.
