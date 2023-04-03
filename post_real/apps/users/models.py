@@ -12,7 +12,7 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     username = models.CharField(max_length = 50, unique = True, db_index=True)
     email = models.EmailField(_('email address'), unique = True, db_index=True)
-    phone_no = models.CharField(_('phone no.'), max_length = 15, blank = True, validators=[RegexValidator(r'^[0-9-+]+$','Invalid Mobile Number'), MinLengthValidator(10)])
+    phone_no = models.CharField(_('phone no.'), max_length = 15, blank=True, null=True, validators=[RegexValidator(r'^[0-9-+]+$','Invalid Mobile Number'), MinLengthValidator(10)])
     bio = models.TextField(max_length=300)
     profilePicUrl = models.ImageField(upload_to='profilePics/')
 

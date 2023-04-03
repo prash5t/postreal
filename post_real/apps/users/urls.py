@@ -9,5 +9,5 @@ router = routers.DefaultRouter()
 urlpatterns = [
     # path('', include(router.urls)),
     path('users/register/', views.UserRegisterView.as_view(), name='register_user'),
-    path('users/detail/', views.UserDetailApiView.as_view(), name='user_details'),
+    path('users/detail/', views.UserListUpdateDeleteView.as_view(), name='user_details'),
 ]
