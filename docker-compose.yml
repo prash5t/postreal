@@ -1,0 +1,9 @@
+version: "3.10"
+
+services:
+  web:
+    build: .
+    container_name: post_real_container
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"

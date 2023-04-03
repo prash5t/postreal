@@ -1,0 +1,9 @@
+ENVIRON = "local"
+SECRET_KEY = "<secret_key>"
+
+# database 
+NAME = "<db_name>"
+USER = "<db_user>"
+PASSWORD = "<db_password>"
+HOST = "<db_host>"
+PORT = "<port>"
