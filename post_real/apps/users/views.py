@@ -57,3 +57,15 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             return Response({'success': False, 'data': err}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete authenticated user.
+        """
+        try: 
+            authenticated_user = request.user
+            authenticated_user.delete()
+            return Response({'success': True, 'data': "Successfully deleted user"}, status=status.HTTP_200_OK)
+
+        except Exception as err:
+            print(err)
+            return Response({'success': False, 'data': err}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
