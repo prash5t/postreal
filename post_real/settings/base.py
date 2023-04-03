@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+
 # This environment variable has to be specified
 # Let it fail if not specified
 ENVIRON = os.environ.get("ENVIRON").lower()

@@ -5,3 +5,4 @@ python-dotenv==0.21.0
 whitenoise==6.4.0
 django-cleanup==6.0.0
 Pillow==9.2.0
+djangorestframework-simplejwt==5.2.0
