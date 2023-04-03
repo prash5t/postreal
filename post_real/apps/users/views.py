@@ -1,13 +1,10 @@
-from rest_framework import viewsets
-from django.http import HttpResponse
+from rest_framework import viewsets, status
+from rest_framework import generics
+from .serializers import UserSerializer
 
-
-def helloWorld(request):
-    return HttpResponse("Hello World!")
-
-
-class UserViewSet(viewsets.ModelViewSet):
+class UserRegisterView(generics.CreateAPIView):
     """
-    API endpoint that allows users to be viewed or edited.
+    View that allows users to be created.
     """
-    pass
+    serializer_class = UserSerializer
+
