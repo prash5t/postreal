@@ -22,7 +22,7 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
-    list_display = ['username', 'email', 'bio', 'is_staff']
+    list_display = ['id', 'username', 'email', 'bio', 'is_staff']
     search_fields = ('username', 'email')
     ordering = ['username', 'email']
 

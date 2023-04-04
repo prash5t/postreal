@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_cleanup',
+    'rest_framework_simplejwt',
 
     # user defined
     'post_real.apps.users',
