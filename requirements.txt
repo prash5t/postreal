@@ -1,4 +1,4 @@
-Django==4.1.2
+Django==4.2
 djangorestframework==3.14.0
 django-cors-headers==3.13.0
 python-dotenv==0.21.0
@@ -6,3 +6,6 @@ whitenoise==6.4.0
 django-cleanup==6.0.0
 Pillow==9.2.0
 djangorestframework-simplejwt==5.2.0
+django-storages==1.13.2
+django-filter==23.1
+boto3==1.26.105
