@@ -17,3 +17,4 @@ from .drf import *
 from .middleware import *
 from .template import *
 from .cors import *
+from .logging import *
