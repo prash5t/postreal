@@ -1,28 +1,24 @@
 import logging
 from rest_framework.response import Response
 
+# logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S",)
+
 logger = logging.getLogger('django')
+info_logger = logging.getLogger('postreal-info')
+error_logger = logging.getLogger('postreal-error')
 
 
-def log_and_respond(data=None, status=None, message_code=None, message=None, exception=None, additional_data=None, response_data={}, no_response=False):
+def generic_response(success=None, message=None, data=None, status=None, additional_data=None, no_response=False):
     if not additional_data:
         additional_data = {}
 
-    if exception:
-        logger.exception(exception)
     response_body = {
-        "code": message_code,
+        "success": success,
         "message": message,
         "data": data or {},
         **additional_data
       }
-    response_data['code'] = response_body['code']
-    response_data['message'] = response_body['message']
-    response_data['data'] = response_body['data']
     
-    if additional_data:
-        for key, value in additional_data.items():
-            response_data[key] = value
     # this optional arg is used to just return the standard format for response
     # reason -> While validation error we need to have the 
     # same format for response 
