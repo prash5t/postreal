@@ -18,7 +18,7 @@ Social media app that only allows you to post photos from your camera, not from 
 - Optimize code, refactor, implement local storage caching
 - Publish to Google Play Store
 - Your PR's or any form of contribution will be acknowledged.
-- For any purpose: hello@ghimireprashant.com.np
+- For any purpose: hi@ghimireprashant.com.np
 
 ##### Integrated Services:
 
