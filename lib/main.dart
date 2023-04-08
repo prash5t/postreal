@@ -32,8 +32,6 @@ class MyApp extends StatelessWidget {
                 AuthBloc()..add(AuthCheckerEvent())),
         BlocProvider<AddPhotoBloc>(
             create: (BuildContext context) => AddPhotoBloc()),
-        BlocProvider<EditProfileBloc>(
-            create: (BuildContext context) => EditProfileBloc()),
         ChangeNotifierProvider(
           create: (_) => UserProvider(),
         ),

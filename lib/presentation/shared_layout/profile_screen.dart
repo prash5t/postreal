@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/business_logic/editprofile_bloc/editprofile_bloc.dart';
@@ -106,7 +107,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             boolTrueText: "Sign out");
                         try {
                           if (shouldLogout!) {
-                            context.read<AuthBloc>().add(LogoutClickedEvent());
+                            BlocProvider.of<AuthBloc>(context)
+                                .add(LogoutClickedEvent());
                             Navigator.pushReplacementNamed(
                                 context, AppRoutes.loginscreen);
                             Fluttertoast.showToast(
@@ -165,9 +167,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: ElevatedButton(
                             onPressed: () async {
                               if (isProfileOwner) {
-                                context
-                                    .read<EditProfileBloc>()
-                                    .add(EditInitialEvent());
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                       builder: (context) => EditProfileScreen(
@@ -191,9 +190,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             widget.uIdOfProfileOwner,
                                         stalkerId: loggedInUser.uid);
 
-                                UserProvider userProvider =
-                                    Provider.of(context, listen: false);
-                                await userProvider.refreshUser();
+                                await Provider.of<UserProvider>(context,
+                                        listen: false)
+                                    .refreshUser();
                                 setState(() {
                                   fetchDataOfProfileOwner();
                                   followUnfollowTaskGoingOn = false;
@@ -270,14 +269,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         followUnfollowTaskGoingOn
-            ? Stack(
-                children: const [
-                  Opacity(
-                    opacity: 0.8,
-                    child:
-                        ModalBarrier(dismissible: false, color: Colors.black45),
-                  ),
-                ],
+            ? const Opacity(
+                opacity: 0.8,
+                child: ModalBarrier(dismissible: false, color: Colors.black45),
               )
             : const SizedBox()
       ],

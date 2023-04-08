@@ -35,15 +35,15 @@ Future<dynamic> postModalBottomSheet(
                   child: Container(color: Colors.grey, width: 150, height: 4)),
             ),
             const SizedBox(height: 10),
-            CustomText(text: "@${post.username}", isBold: true),
+            CustomText(text: dateToString(post.datePublished), isBold: true),
             ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.grey,
                 backgroundImage: NetworkImage(post.profilePicUrl),
               ),
-              title: Text(post.caption),
+              title: Text(post.username),
               subtitle: Text(
-                dateToString(post.datePublished),
+                post.caption,
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,

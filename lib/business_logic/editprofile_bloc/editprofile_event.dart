@@ -7,8 +7,6 @@ abstract class EditProfileEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class EditInitialEvent extends EditProfileEvent {}
-
 class EditClickedEvent extends EditProfileEvent {
   final String newUsername;
   final String newBio;

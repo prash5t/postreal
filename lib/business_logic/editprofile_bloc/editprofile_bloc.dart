@@ -9,14 +9,8 @@ part 'editprofile_state.dart';
 class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
   EditProfileBloc() : super(EditProfileInitial()) {
     on<EditClickedEvent>(_editProfile);
-    on<EditInitialEvent>(_initialEvent);
   }
   final FirestoreMethods _methods = FirestoreMethods();
-
-  FutureOr<void> _initialEvent(
-      EditInitialEvent initialEvent, Emitter<EditProfileState> emit) {
-    emit.call(EditProfileInitial());
-  }
 
   FutureOr<void> _editProfile(
       EditClickedEvent editClickedEvent, Emitter<EditProfileState> emit) async {
