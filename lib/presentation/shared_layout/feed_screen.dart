@@ -35,6 +35,7 @@ class FeedScreen extends StatelessWidget {
                 );
               }
               return ListView.builder(
+                  key: const PageStorageKey<String>('page'),
                   scrollDirection: Axis.vertical,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) => PostCard(
