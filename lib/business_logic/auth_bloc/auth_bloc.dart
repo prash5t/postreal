@@ -49,11 +49,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit.call(AppOpeningState());
     final currentUser = _authMethods.auth.currentUser;
     if (currentUser != null) {
-      final bool userAvailableInGlobalSpace =
-          await _bringCurrentUserToGlobalSpace();
-      userAvailableInGlobalSpace
-          ? emit.call(LoggedInState())
-          : emit.call(AppOpeningState());
+      await _bringCurrentUserToGlobalSpace();
+      emit.call(LoggedInState());
     } else {
       emit.call(LoggedOutState());
     }
@@ -71,11 +68,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (loginMsg == "success") {
-      final bool userAvailableInGlobalSpace =
-          await _bringCurrentUserToGlobalSpace();
-      userAvailableInGlobalSpace
-          ? emit.call(LoggedInState())
-          : emit.call(LoadingState());
+      await _bringCurrentUserToGlobalSpace();
+      emit.call(LoggedInState());
     } else {
       emit.call(LoggedOutState());
       emit.call(ErrorState(message: loginMsg));
@@ -94,26 +88,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         selfieFile: registerClickedEvent.profilePic);
 
     if (registerMsg == "success") {
-      final bool userAvailableInGlobalSpace =
-          await _bringCurrentUserToGlobalSpace();
-      userAvailableInGlobalSpace
-          ? emit.call(LoggedInState())
-          : emit.call(LoadingState());
+      await _bringCurrentUserToGlobalSpace();
+      emit.call(LoggedInState());
     } else {
-      emit.call(LoggedOutState());
+      // emit.call(LoggedOutState());
       emit.call(ErrorState(message: registerMsg));
     }
   }
 
   // need current user information in home screen,
   // so making it ready from the auth stage by keeping it in global space
-  Future<bool> _bringCurrentUserToGlobalSpace() async {
+  Future<void> _bringCurrentUserToGlobalSpace() async {
     final currentUser = _authMethods.auth.currentUser;
     DocumentSnapshot snapshot = await _authMethods.firestore
         .collection('users')
         .doc(currentUser!.uid)
         .get();
     _currentUser = model.User.fromSnap(snapshot);
-    return true;
   }
 }

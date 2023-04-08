@@ -123,6 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return StaggeredGridView.countBuilder(
+                        key: const PageStorageKey<String>('searchFeedPage'),
                         crossAxisCount: 3,
                         itemCount: postSnapshot.data!.docs.length,
                         itemBuilder: (context, index) {

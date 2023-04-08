@@ -139,7 +139,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 dataOfProfileOwner['profilePicUrl']),
                           ),
                           Expanded(
-                            flex: 1,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
