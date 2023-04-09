@@ -39,3 +39,11 @@ def log_field_error(error):
         data=error,
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+def log_object_not_found_error():
+    return generic_response(
+            success=False,
+            message="Post Doesn't Exists!",
+            status=status.HTTP_404_NOT_FOUND
+        )

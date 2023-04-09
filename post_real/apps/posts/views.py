@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from .models import Post
 from .serializers import PostSerializer
 from post_real.core.authorization import check_user_access_on_post
-from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, log_object_not_found_error
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -92,11 +92,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post info requested for user: {authenticated_user.username}')
-            return generic_response(
-                success=False,
-                message="Post Doesn't Exists!",
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return log_object_not_found_error()
         
         except Exception as err:
             return log_exception(err)
@@ -135,11 +131,35 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post update requested for user: {authenticated_user.username}')
+            return log_object_not_found_error()
+        
+        except Exception as err:
+            return log_exception(err)
+    
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete post of authenticated user.
+        """
+        try:
+            authenticated_user = request.user
+            post_obj = self.get_object()
+
+            result, has_access = check_user_access_on_post(authenticated_user, post_obj)
+            if not has_access: return generic_response(**result)
+
+            post_obj.delete()
+
+            info_logger.info(f'Delete post requested for user: {authenticated_user.username}, post:{post_obj.id}')
             return generic_response(
-                success=False,
-                message="Post Doesn't Exists!",
-                status=status.HTTP_404_NOT_FOUND
+                success=True,
+                message='Post Deleted Successfully',
+                status=status.HTTP_200_OK
             )
+        
+        except Http404:
+            info_logger.warn(f'Not existing post delete requested for user: {authenticated_user.username}')
+            return log_object_not_found_error()
         
         except Exception as err:
             return log_exception(err)
