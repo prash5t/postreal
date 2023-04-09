@@ -3,7 +3,7 @@ from .serializers import UserSerializer
 from rest_framework import generics
 from rest_framework import status
 
-from post_real.core.log_and_response import generic_response, info_logger, log_exception
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -32,13 +32,8 @@ class UserRegisterView(generics.CreateAPIView):
                     status=status.HTTP_200_OK
                 )
             
-            info_logger.info(f'Field error / Bad request while registering new user')
-            return generic_response(
-                success=False,
-                message='Invalid Input / Field Error',
-                data=serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            info_logger.warn(f'Field error / Bad request while registering new user')
+            return log_field_error(serializer.errors)
 
         except Exception as err:
             return log_exception(err)
@@ -98,13 +93,8 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
                     status=status.HTTP_200_OK
                 )
             
-            info_logger.info(f'Field error / Bad Request while updating user: {authenticated_user.username}')
-            return generic_response(
-                success=False,
-                message='Invalid Input/Field Error',
-                data=serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            info_logger.warn(f'Field error / Bad Request while updating user: {authenticated_user.username}')
+            return log_field_error(serializer.errors)
 
         except Exception as err:
             return log_exception(err)

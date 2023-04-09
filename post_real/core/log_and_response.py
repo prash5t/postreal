@@ -30,3 +30,12 @@ def log_exception(error):
                 message="Something Went Wrong!",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+def log_field_error(error):
+    return generic_response(
+        success=False,
+        message='Invalid Input/Field Error',
+        data=error,
+        status=status.HTTP_400_BAD_REQUEST
+    )

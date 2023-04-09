@@ -5,7 +5,7 @@ from rest_framework import viewsets, status
 from .models import Post
 from .serializers import PostSerializer
 from post_real.core.authorization import check_user_access_on_post
-from post_real.core.log_and_response import generic_response, info_logger, log_exception
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -40,13 +40,8 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_201_CREATED
                 )
             
-            info_logger.info(f'Field error / Bad request while creating post.')
-            return generic_response(
-                success=False,
-                message='Invalid Input / Field Error',
-                data=serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            info_logger.warn(f'Field error / Bad request while creating post for user: {authenticated_user.username}')
+            return log_field_error(serializer.errors)
         
         except Exception as err:
             return log_exception(err)
@@ -83,9 +78,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post_obj = self.get_object()
 
             result, has_access = check_user_access_on_post(authenticated_user, post_obj)
-            if not has_access:
-                info_logger.warn(f'Unauthorized post info requested for user: {authenticated_user.username}, post: {post_obj.id}')
-                return generic_response(**result)
+            if not has_access: return generic_response(**result)
 
             serializer = self.serializer_class(post_obj)
 
@@ -98,7 +91,50 @@ class PostViewSet(viewsets.ModelViewSet):
             )
         
         except Http404:
-            info_logger.warn(f'Not Existing post info requested for user: {authenticated_user.username}')
+            info_logger.warn(f'Not existing post info requested for user: {authenticated_user.username}')
+            return generic_response(
+                success=False,
+                message="Post Doesn't Exists!",
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        except Exception as err:
+            return log_exception(err)
+    
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update post of authenticated user.
+        """
+        try:
+            authenticated_user = request.user
+            post_obj = self.get_object()
+            payload = request.data
+
+            result, has_access = check_user_access_on_post(authenticated_user, post_obj)
+            if not has_access: return generic_response(**result)
+
+            payload._mutable = True
+            if payload.get("postPicUrl"): payload.pop("postPicUrl")
+            payload._mutable = False
+
+            serializer = self.serializer_class(post_obj, data=payload, partial=True)
+            if serializer.is_valid():
+                self.perform_update(serializer)
+
+                info_logger.info(f'Post info updated for user: {authenticated_user.username}, post: {post_obj.id}')
+                return generic_response(
+                    success=True,
+                    message='Post Updated',
+                    data=serializer.data,
+                    status=status.HTTP_200_OK
+                )
+
+            info_logger.warn(f'Field error / Bad Request while updating post: {post_obj.id} for user: {authenticated_user.username}')
+            return log_field_error(serializer.errors)
+        
+        except Http404:
+            info_logger.warn(f'Not existing post update requested for user: {authenticated_user.username}')
             return generic_response(
                 success=False,
                 message="Post Doesn't Exists!",
