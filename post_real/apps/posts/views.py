@@ -50,4 +50,26 @@ class PostViewSet(viewsets.ModelViewSet):
             return log_exception(err)
         
     
+    def list(self, request, *args, **kwargs):
+        """
+        List all the posts of authenticated user.
+        """
+        try:
+            authenticated_user = request.user
+            queryset = authenticated_user.post_set.order_by("-created_at")
+
+            serializer = self.serializer_class(queryset, many=True)
+
+            info_logger.info(f'Posts info requested for user: {authenticated_user.username}')
+            return generic_response(
+                success=True,
+                message='Posts Info',
+                data=serializer.data,
+                status=status.HTTP_200_OK
+            )
+        
+        except Exception as err:
+            return log_exception(err)
+    
+
     
