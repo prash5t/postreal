@@ -3,10 +3,9 @@ from rest_framework import routers
 from django.urls import include, path
 
 router = routers.DefaultRouter()
-# router.register(r'users', views.UserViewSet, basename="users")
+router.register(r'operation', views.PostViewSet, basename="post_operation")
 
 
 urlpatterns = [
-    # path('', include(router.urls)),
-    # path('register/', views.UserRegisterView.as_view(), name='register_user'),
+    path('', include(router.urls)),
 ]
