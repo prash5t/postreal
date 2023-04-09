@@ -8,6 +8,6 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     # path('', include(router.urls)),
-    path('users/register/', views.UserRegisterView.as_view(), name='register_user'),
-    path('users/detail/', views.UserListUpdateDeleteView.as_view(), name='user_details'),
+    path('register/', views.UserRegisterView.as_view(), name='register_user'),
+    path('detail/', views.UserListUpdateDeleteView.as_view(), name='user_details'),
 ]

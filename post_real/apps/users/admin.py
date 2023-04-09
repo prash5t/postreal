@@ -13,7 +13,7 @@ class UserAdmin(BaseUserAdmin):
       (_('Personal info'), {'fields': ('first_name', 'last_name', 'phone_no')}),
       (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
       (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-      (_('user_info'), {'fields': ('bio', 'is_verified', 'profilePicUrl')}),  
+      (_('user_info'), {'fields': ('bio', 'profilePicUrl')}),  
   )
     add_fieldsets = (
         (None, {
@@ -22,7 +22,7 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
-    list_display = ['id', 'username', 'email', 'bio', 'is_verified']
+    list_display = ['id', 'username', 'is_verified', 'last_login', 'date_joined', 'updated_at']
     search_fields = ('username', 'email')
     ordering = ['username', 'email']
 
