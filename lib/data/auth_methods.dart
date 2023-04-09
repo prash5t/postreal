@@ -20,15 +20,26 @@ class AuthMethods {
   }
 
   Future<String> loginUser(String email, String password) async {
-    String result;
     try {
       await auth.signInWithEmailAndPassword(
           email: email.trim(), password: password);
-      result = "success";
+      return "success";
     } catch (err) {
-      result = err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
+      return err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
     }
-    return result;
+  }
+
+  // this method can be used to check if provided username already exists or not
+  // can be used in cases like: registering user, updating username
+  Future<bool> userExits(String username) async {
+    QuerySnapshot querySnapshot = await firestore
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      return true;
+    }
+    return false;
   }
 
   Future<String> signupUser(
@@ -37,17 +48,11 @@ class AuthMethods {
       required String username,
       required String bio,
       required File selfieFile}) async {
-    String result;
     try {
       // first we need to check if user with this username already exists or not
-      QuerySnapshot querySnapshot = await firestore
-          .collection('users')
-          .where('username', isEqualTo: username)
-          .get();
-      if (querySnapshot.docs.isNotEmpty) {
+      if (await userExits(username)) {
         return "This username is already used.";
       }
-
       // second need to register user to firebase authentication if username is unique
       UserCredential cred = await auth.createUserWithEmailAndPassword(
           email: email.trim(), password: password);
@@ -70,11 +75,9 @@ class AuthMethods {
           .collection('users')
           .doc(cred.user!.uid)
           .set(user.toJson());
-
-      result = "success";
+      return "success";
     } catch (err) {
-      result = err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
+      return err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
     }
-    return result;
   }
 }

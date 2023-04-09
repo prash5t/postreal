@@ -13,35 +13,19 @@ class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
   final FirestoreMethods _methods = FirestoreMethods();
 
   FutureOr<void> _editProfile(
-      EditClickedEvent editClickedEvent, Emitter<EditProfileState> emit) async {
+      EditClickedEvent event, Emitter<EditProfileState> emit) async {
     emit.call(EditProfileProcessing());
-
-    bool dataUpdated = true;
-    // when both new bio and username are diff, need to update both
-    if (editClickedEvent.newBio != editClickedEvent.oldBio &&
-        editClickedEvent.newUsername != editClickedEvent.oldUsername) {
-      final bool isUpdated = await _methods.updateUsernameAndBio(
-          editClickedEvent.newBio,
-          editClickedEvent.newUsername,
-          editClickedEvent.userId);
-      dataUpdated = isUpdated;
+    try {
+      // update each field serially
+      bool usernameUpdated = await _methods.updateUsername(
+          event.newUsername, event.oldUsername, event.userId);
+      if (!usernameUpdated) {
+        emit.call(UpdateErrorState(message: "This username is already taken."));
+      }
+      await _methods.updateBio(event.newBio, event.oldBio, event.userId);
+      emit.call(ProfileUpdatedState());
+    } catch (e) {
+      emit.call(UpdateErrorState(message: e.toString()));
     }
-    // when bio is new but same old username, need to update just bio
-    else if (editClickedEvent.newBio != editClickedEvent.oldBio &&
-        editClickedEvent.newUsername == editClickedEvent.oldUsername) {
-      final bool isUpdated = await _methods.updateBio(
-          editClickedEvent.newBio, editClickedEvent.userId);
-      dataUpdated = isUpdated;
-    }
-    // when username is new but same old bio, need to udapte just username
-    else {
-      final bool isUpdated = await _methods.updateUsername(
-          editClickedEvent.newUsername, editClickedEvent.userId);
-      dataUpdated = isUpdated;
-    }
-
-    dataUpdated
-        ? emit.call(ProfileUpdatedState())
-        : emit.call(UpdateErrorState(message: "Could not update profile."));
   }
 }

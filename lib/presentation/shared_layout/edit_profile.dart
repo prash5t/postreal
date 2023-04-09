@@ -6,15 +6,9 @@ import 'package:postreal/presentation/shared_layout/home_screen.dart';
 import 'package:postreal/utils/validator.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  final String username;
-  final String bio;
-  final String userId;
+  final Map dataofProfileOwner;
 
-  const EditProfileScreen(
-      {super.key,
-      required this.username,
-      required this.bio,
-      required this.userId});
+  const EditProfileScreen({super.key, required this.dataofProfileOwner});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -34,8 +28,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _usernameController.text = widget.username;
-    _bioController.text = widget.bio;
+    _usernameController.text = widget.dataofProfileOwner['username'];
+    _bioController.text = widget.dataofProfileOwner['bio'];
     return BlocProvider<EditProfileBloc>(
       create: (context) => EditProfileBloc(),
       child: BlocBuilder<EditProfileBloc, EditProfileState>(
@@ -46,77 +40,78 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         } else if (editProfileState is UpdateErrorState) {
           Fluttertoast.showToast(msg: editProfileState.message!);
         }
-        return Material(
-            child: SafeArea(
+        return Scaffold(
+            body: SafeArea(
                 child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Form(
-                  key: _updateProfileKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _usernameController,
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          return TextFieldValidator.validateUsername(value);
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        decoration:
-                            const InputDecoration(labelText: "Username"),
-                      ),
-                      TextFormField(
-                        controller: _bioController,
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          return TextFieldValidator.bioValidator(value);
-                        },
-                        maxLines: 3,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        decoration: const InputDecoration(labelText: "Bio"),
-                      ),
-                    ],
-                  )),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                    onPressed: () {
-                      if (_updateProfileKey.currentState!.validate()) {
-                        final String newUsername =
-                            _usernameController.text.trim();
-                        final String newBio = _bioController.text.trim();
-                        // when user makes no changes in fields
-                        if (newUsername == widget.username &&
-                            newBio == widget.bio) {
-                          Navigator.pop(context);
-                        }
-                        // when there is new info, we need to update info
-                        else {
-                          context.read<EditProfileBloc>().add((EditClickedEvent(
-                              newUsername: newUsername,
-                              newBio: newBio,
-                              oldUsername: widget.username,
-                              oldBio: widget.bio,
-                              userId: widget.userId)));
-                        }
-                      }
+          child: Form(
+              key: _updateProfileKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: _usernameController,
+                    keyboardType: TextInputType.text,
+                    validator: (value) {
+                      return TextFieldValidator.validateUsername(value);
                     },
-                    child: (editProfileState is EditProfileProcessing)
-                        ? const LinearProgressIndicator()
-                        : const Text("Update")),
-              ),
-              TextButton(
-                  onPressed: (editProfileState is EditProfileProcessing)
-                      ? null
-                      : () {
-                          Navigator.pop(context);
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(
+                      labelText: "Username",
+                    ),
+                  ),
+                  TextFormField(
+                    controller: _bioController,
+                    keyboardType: TextInputType.text,
+                    validator: (value) {
+                      return TextFieldValidator.bioValidator(value);
+                    },
+                    maxLines: 3,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(labelText: "Bio"),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          if (_updateProfileKey.currentState!.validate()) {
+                            final String newUsername =
+                                _usernameController.text.trim();
+                            final String newBio = _bioController.text.trim();
+                            // when user makes no changes in fields
+                            if (newUsername ==
+                                    widget.dataofProfileOwner['username'] &&
+                                newBio == widget.dataofProfileOwner['bio']) {
+                              Navigator.pop(context);
+                            }
+                            // when there is new info, we need to update info
+                            else {
+                              context.read<EditProfileBloc>().add(
+                                  (EditClickedEvent(
+                                      newUsername: newUsername,
+                                      newBio: newBio,
+                                      oldUsername:
+                                          widget.dataofProfileOwner['username'],
+                                      oldBio: widget.dataofProfileOwner['bio'],
+                                      userId:
+                                          widget.dataofProfileOwner['uid'])));
+                            }
+                          }
                         },
-                  child: const Text("Dissmiss"))
-            ],
-          ),
+                        child: (editProfileState is EditProfileProcessing)
+                            ? const LinearProgressIndicator()
+                            : const Text("Update")),
+                  ),
+                  TextButton(
+                      onPressed: (editProfileState is EditProfileProcessing)
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                            },
+                      child: const Text("Dissmiss"))
+                ],
+              )),
         )));
       }),
     );

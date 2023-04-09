@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:postreal/data/auth_methods.dart';
 import 'package:postreal/data/models/comment.dart';
 import 'package:postreal/data/models/post.dart';
 import 'package:postreal/data/models/user.dart' as model;
@@ -8,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 class FirestoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthMethods _authMethods = AuthMethods();
 
   // function to add new post/photo
   Future<String> addNewPost({
@@ -43,41 +45,47 @@ class FirestoreMethods {
   }
 
   // function to update username
-  Future<bool> updateUsername(String newUsername, String userId) async {
-    try {
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .update({'username': newUsername});
+  // not using try/catch here because it will be taken care in the editprofile_bloc
+  Future<bool> updateUsername(
+      String newUsername, String oldUsername, String userId) async {
+    if (newUsername == oldUsername) {
       return true;
-    } catch (e) {
+    }
+    if (await _authMethods.userExits(newUsername)) {
       return false;
     }
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .update({'username': newUsername});
+    return true;
   }
 
   // function to update username
-  Future<bool> updateBio(String newBio, String userId) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({'bio': newBio});
+  Future<bool> updateBio(String newBio, String oldBio, String userId) async {
+    if (newBio == oldBio) {
       return true;
-    } catch (e) {
-      return false;
     }
+    await _firestore.collection('users').doc(userId).update({'bio': newBio});
+    return true;
   }
 
   // function to update both username and bio
-  Future<bool> updateUsernameAndBio(
-      String newBio, String newUsername, String userId) async {
-    try {
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .update({'username': newUsername, 'bio': newBio});
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
+  // Future<bool> updateUsernameAndBio(
+  //     String newBio, String newUsername, String userId) async {
+  //   try {
+  //     if (await _authMethods.userExits(newUsername)) {
+  //       return false;
+  //     }
+  //     await _firestore
+  //         .collection('users')
+  //         .doc(userId)
+  //         .update({'username': newUsername, 'bio': newBio});
+  //     return true;
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
 
   // function to like or unlike a post
   Future<bool> likeUnlikePost(String postId, String uid, List likes) async {

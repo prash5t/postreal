@@ -155,7 +155,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             Expanded(
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
@@ -184,11 +183,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (context) => EditProfileScreen(
-                                              username: dataOfProfileOwner[
-                                                  'username'],
-                                              bio: dataOfProfileOwner['bio'],
-                                              userId: loggedInUser.uid,
-                                            )),
+                                            dataofProfileOwner:
+                                                dataOfProfileOwner)),
                                   );
                                 } else {
                                   setState(() {
