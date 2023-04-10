@@ -51,7 +51,7 @@ class FirestoreMethods {
     if (newUsername == oldUsername) {
       return true;
     }
-    if (await _authMethods.userExits(newUsername)) {
+    if (await _authMethods.usernameExits(newUsername)) {
       return false;
     }
     await _firestore
@@ -69,23 +69,6 @@ class FirestoreMethods {
     await _firestore.collection('users').doc(userId).update({'bio': newBio});
     return true;
   }
-
-  // function to update both username and bio
-  // Future<bool> updateUsernameAndBio(
-  //     String newBio, String newUsername, String userId) async {
-  //   try {
-  //     if (await _authMethods.userExits(newUsername)) {
-  //       return false;
-  //     }
-  //     await _firestore
-  //         .collection('users')
-  //         .doc(userId)
-  //         .update({'username': newUsername, 'bio': newBio});
-  //     return true;
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
 
   // function to like or unlike a post
   Future<bool> likeUnlikePost(String postId, String uid, List likes) async {

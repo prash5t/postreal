@@ -21,9 +21,10 @@ class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
           event.newUsername, event.oldUsername, event.userId);
       if (!usernameUpdated) {
         emit.call(UpdateErrorState(message: "This username is already taken."));
+      } else {
+        await _methods.updateBio(event.newBio, event.oldBio, event.userId);
+        emit.call(ProfileUpdatedState());
       }
-      await _methods.updateBio(event.newBio, event.oldBio, event.userId);
-      emit.call(ProfileUpdatedState());
     } catch (e) {
       emit.call(UpdateErrorState(message: e.toString()));
     }

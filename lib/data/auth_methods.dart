@@ -31,7 +31,7 @@ class AuthMethods {
 
   // this method can be used to check if provided username already exists or not
   // can be used in cases like: registering user, updating username
-  Future<bool> userExits(String username) async {
+  Future<bool> usernameExits(String username) async {
     QuerySnapshot querySnapshot = await firestore
         .collection('users')
         .where('username', isEqualTo: username)
@@ -50,7 +50,7 @@ class AuthMethods {
       required File selfieFile}) async {
     try {
       // first we need to check if user with this username already exists or not
-      if (await userExits(username)) {
+      if (await usernameExits(username)) {
         return "This username is already used.";
       }
       // second need to register user to firebase authentication if username is unique

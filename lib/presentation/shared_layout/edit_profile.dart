@@ -50,6 +50,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextFormField(
+                      readOnly: true,
+                      initialValue: widget.dataofProfileOwner['email'],
+                      decoration: InputDecoration(
+                          labelText: "Email",
+                          suffixIcon: IconButton(
+                              onPressed: () {}, icon: const Icon(Icons.edit)))),
+                  TextFormField(
                     controller: _usernameController,
                     keyboardType: TextInputType.text,
                     validator: (value) {
@@ -66,7 +73,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     validator: (value) {
                       return TextFieldValidator.bioValidator(value);
                     },
-                    maxLines: 3,
+                    maxLines: 2,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(labelText: "Bio"),
                   ),
@@ -79,24 +86,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             final String newUsername =
                                 _usernameController.text.trim();
                             final String newBio = _bioController.text.trim();
-                            // when user makes no changes in fields
-                            if (newUsername ==
-                                    widget.dataofProfileOwner['username'] &&
-                                newBio == widget.dataofProfileOwner['bio']) {
-                              Navigator.pop(context);
-                            }
+                            // // when user makes no changes in fields
+                            // if (newUsername ==
+                            //         widget.dataofProfileOwner['username'] &&
+                            //     newBio == widget.dataofProfileOwner['bio']) {
+                            //   Navigator.pop(context);
+                            // }
                             // when there is new info, we need to update info
-                            else {
-                              context.read<EditProfileBloc>().add(
-                                  (EditClickedEvent(
-                                      newUsername: newUsername,
-                                      newBio: newBio,
-                                      oldUsername:
-                                          widget.dataofProfileOwner['username'],
-                                      oldBio: widget.dataofProfileOwner['bio'],
-                                      userId:
-                                          widget.dataofProfileOwner['uid'])));
-                            }
+                            // else {
+                            context.read<EditProfileBloc>().add(
+                                (EditClickedEvent(
+                                    newUsername: newUsername,
+                                    newBio: newBio,
+                                    oldUsername:
+                                        widget.dataofProfileOwner['username'],
+                                    oldBio: widget.dataofProfileOwner['bio'],
+                                    userId: widget.dataofProfileOwner['uid'])));
+                            // }
                           }
                         },
                         child: (editProfileState is EditProfileProcessing)
