@@ -5,6 +5,12 @@ LOGGING = {
     # Enable the existing loggers
     'disable_existing_loggers': False,
 
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
+    },
+
     # Define the formatters
     'formatters': {
             'verbose': {
@@ -15,12 +21,13 @@ LOGGING = {
     # Define the handlers
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            # 'filters': ['require_debug_true'],
             'formatter': 'verbose'
         },
         'django': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': 'postreal-request.log',
             'formatter': 'verbose',
@@ -63,5 +70,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+
+        #db query logger
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
     },
 }

@@ -18,4 +18,5 @@ INSTALLED_APPS = [
 
     # user defined
     'post_real.apps.users',
+    'post_real.apps.posts',
 ]

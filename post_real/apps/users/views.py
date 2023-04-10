@@ -3,7 +3,7 @@ from .serializers import UserSerializer
 from rest_framework import generics
 from rest_framework import status
 
-from post_real.core.log_and_response import generic_response, info_logger, error_logger
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -18,7 +18,9 @@ class UserRegisterView(generics.CreateAPIView):
         Register new user.
         """
         try: 
-            serializer = self.serializer_class(data=request.data)
+            payload = request.data
+
+            serializer = self.serializer_class(data=payload)
             if serializer.is_valid():
                 serializer.save()
 
@@ -30,21 +32,11 @@ class UserRegisterView(generics.CreateAPIView):
                     status=status.HTTP_200_OK
                 )
             
-            info_logger.info(f'Field error / Bad request while registering new user')
-            return generic_response(
-                success=False,
-                message='Invalid Input / Field Error',
-                data=serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            info_logger.warn(f'Field error / Bad request while registering new user')
+            return log_field_error(serializer.errors)
 
         except Exception as err:
-            error_logger.error(err)
-            return generic_response(
-                success=False,
-                message="Something Went Wrong!",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return log_exception(err)
 
 
 class UserListUpdateDeleteView(generics.GenericAPIView):
@@ -60,6 +52,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
         """
         try:
             authenticated_user = request.user
+
             serializer = self.serializer_class(authenticated_user)
 
             info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
@@ -71,12 +64,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             )
         
         except Exception as err:
-            error_logger.error(err)
-            return generic_response(
-                success=False,
-                message="Something Went Wrong!",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return log_exception(err)
 
 
     def patch(self, request, *args, **kwargs):
@@ -84,15 +72,16 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
         Update details of authenticated user.
         """
         try: 
+            payload = request.data
             authenticated_user = request.user
             
+            payload._mutable = True
             keys_to_remove = ["email", "username", "password"]
-            request.data._mutable = True
             for each in keys_to_remove: 
-                if request.data.get(each): request.data.pop(each)
-            request.data._mutable = False
+                if payload.get(each): payload.pop(each)
+            payload._mutable = False
             
-            serializer = self.serializer_class(authenticated_user, data=request.data, partial=True)
+            serializer = self.serializer_class(authenticated_user, data=payload, partial=True)
             if serializer.is_valid():
                 serializer.save()
 
@@ -104,21 +93,11 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
                     status=status.HTTP_200_OK
                 )
             
-            info_logger.info(f'Field error while updating user: {authenticated_user.username}')
-            return generic_response(
-                success=False,
-                message='Invalid Input/Field Error',
-                data=serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            info_logger.warn(f'Field error / Bad Request while updating user: {authenticated_user.username}')
+            return log_field_error(serializer.errors)
 
         except Exception as err:
-            error_logger.error(err)
-            return generic_response(
-                success=False,
-                message="Something Went Wrong!",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return log_exception(err)
     
 
     def delete(self, request, *args, **kwargs):
@@ -137,9 +116,4 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             )
 
         except Exception as err:
-            error_logger.error(err)
-            return generic_response(
-                success=False,
-                message="Something Went Wrong!",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return log_exception(err)

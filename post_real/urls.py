@@ -30,7 +30,8 @@ urlpatterns = [
     path('apis/v1/verify-token/', TokenVerifyView.as_view(), name='token_verify'),
 
     # app routes
-    path('apis/v1/', include("post_real.apps.users.urls")),
+    path('apis/v1/users/', include("post_real.apps.users.urls")),
+    path('apis/v1/posts/', include("post_real.apps.posts.urls")),
     
 ]
 
