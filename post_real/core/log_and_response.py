@@ -41,7 +41,7 @@ def log_field_error(error):
     )
 
 
-def log_object_not_found_error():
+def post_not_found_error():
     return generic_response(
             success=False,
             message="Post Doesn't Exists!",

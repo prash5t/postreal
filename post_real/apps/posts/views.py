@@ -1,11 +1,12 @@
 from django.http import Http404
 
 from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, authentication_classes
 
-from .models import Post
+from .models import Post, Like, User
 from .serializers import PostSerializer
 from post_real.core.authorization import check_user_access_on_post
-from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, log_object_not_found_error
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, post_not_found_error
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -92,7 +93,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post info requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
@@ -131,7 +132,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post update requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
@@ -159,7 +160,9 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post delete requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
+    
+
