@@ -1,8 +1,11 @@
-from .serializers import UserSerializer
+from django.db import IntegrityError
 
-from rest_framework import generics
 from rest_framework import status
+from rest_framework import generics
+from rest_framework.decorators import api_view
 
+from .models import User, Connection
+from .serializers import UserSerializer
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
@@ -93,7 +96,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
                     status=status.HTTP_200_OK
                 )
             
-            info_logger.warn(f'Field error / Bad Request while updating user: {authenticated_user.username}')
+            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while updating user info')
             return log_field_error(serializer.errors)
 
         except Exception as err:
@@ -117,3 +120,49 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
 
         except Exception as err:
             return log_exception(err)
+
+
+@api_view(["POST"])
+def follow_unfollow_user(request):
+    """
+    Follow/Unfollow user with user id.
+    """
+    try:
+        authenticated_user = request.user
+        following_user_id = request.data.get("userId")
+
+        if not (following_user_id and isinstance(following_user_id, str)) :
+            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while following user')
+            return log_field_error(
+                {"userId": ["This field is required.", "Field type must be str."]}
+            )
+            
+        following_user_obj = User.objects.get(id=following_user_id)
+
+        Connection.objects.create(user_id=authenticated_user, following_user_id=following_user_obj)
+        info_logger.info(f'User: {authenticated_user.username} started following user: {following_user_obj.username}')
+        return generic_response(
+                success=True,
+                message='Started Following User @%s' % following_user_obj.username,
+                status=status.HTTP_200_OK
+            )
+    
+    except IntegrityError:
+        Connection.objects.get(user_id=authenticated_user, following_user_id=following_user_obj).delete()
+        info_logger.info(f'User: {authenticated_user.username} unfollowed user: {following_user_obj.username}')
+        return generic_response(
+                success=True,
+                message='Unfollowed User @%s' % following_user_obj.username,
+                status=status.HTTP_200_OK
+            )
+
+    except User.DoesNotExist:
+        info_logger.warn(f'User: {authenticated_user.username} tried to follow non existing user: {following_user_id}')
+        return generic_response(
+            success=False,
+            message="User Doesn't Exists!",
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    except Exception as err:
+        return log_exception(err)
