@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'profilePicUrl',
             'phone_no',
+            'is_verified'
         ]
         extra_kwargs = {'password': {'write_only': True}}
         

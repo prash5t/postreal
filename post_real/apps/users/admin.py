@@ -1,9 +1,10 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.forms import UserChangeForm
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.admin import UserAdmin
-from .models import User
-from django.contrib.auth.forms import UserChangeForm
+
+from .models import User, Connection
 
 
 class UserAdmin(BaseUserAdmin):
@@ -27,3 +28,8 @@ class UserAdmin(BaseUserAdmin):
     ordering = ['username', 'email']
 
 admin.site.register(User, UserAdmin)
+
+
+@admin.register(Connection)
+class ConnectionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_id', 'following_user_id') 

@@ -76,7 +76,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             authenticated_user = request.user
             
             payload._mutable = True
-            keys_to_remove = ["email", "username", "password"]
+            keys_to_remove = ["email", "password"]
             for each in keys_to_remove: 
                 if payload.get(each): payload.pop(each)
             payload._mutable = False
@@ -85,7 +85,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             if serializer.is_valid():
                 serializer.save()
 
-                info_logger.info(f'User info updated for user: {serializer.data.get("username")}')
+                info_logger.info(f'User info updated for user: {authenticated_user.username}')
                 return generic_response(
                     success=True,
                     message='User Info Updated',
