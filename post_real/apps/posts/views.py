@@ -166,3 +166,42 @@ class PostViewSet(viewsets.ModelViewSet):
             return log_exception(err)
     
 
+@api_view(["POST"])
+def like(request):
+    try:
+        authenticated_user = request.user
+        post_id = request.data.get("postId")
+
+        if not (post_id and type(post_id)==int) :
+            info_logger.warn(f'Field error / Bad Request while liking post for user: {authenticated_user.username}')
+            return log_field_error(
+                {"postId": ["This field is required.", "Field type must be int."]}
+            )
+            
+        post_obj = Post.objects.get(id=post_id)
+
+        has_already_liked = Like.objects.get(postId=post_obj, liked_by=authenticated_user)
+        if has_already_liked:
+            has_already_liked.delete()
+            info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
+            return generic_response(
+                    success=True,
+                    message='Post Unliked',
+                    status=status.HTTP_200_OK
+                )
+    
+    except Post.DoesNotExist:
+        info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
+        return post_not_found_error()
+    
+    except Like.DoesNotExist:
+        Like.objects.create(postId=post_obj, liked_by=authenticated_user)
+        info_logger.info(f'User: {authenticated_user.username} liked post: {post_id}')
+        return generic_response(
+                    success=True,
+                    message='Post Liked',
+                    status=status.HTTP_200_OK
+                )
+    
+    except Exception as err:
+        return log_exception(err)
