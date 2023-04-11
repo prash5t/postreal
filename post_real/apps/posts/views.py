@@ -1,11 +1,12 @@
 from django.http import Http404
 
 from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, authentication_classes
 
-from .models import Post
+from .models import Post, Like, User, Comment
 from .serializers import PostSerializer
 from post_real.core.authorization import check_user_access_on_post
-from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, log_object_not_found_error
+from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, post_not_found_error
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -92,7 +93,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post info requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
@@ -131,7 +132,7 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post update requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
@@ -159,7 +160,88 @@ class PostViewSet(viewsets.ModelViewSet):
         
         except Http404:
             info_logger.warn(f'Not existing post delete requested for user: {authenticated_user.username}')
-            return log_object_not_found_error()
+            return post_not_found_error()
         
         except Exception as err:
             return log_exception(err)
+    
+
+@api_view(["POST"])
+def like_post(request):
+    """
+    Like post with post id.
+    """
+    try:
+        authenticated_user = request.user
+        post_id = request.data.get("postId")
+
+        if not (post_id and isinstance(post_id, int)) :
+            info_logger.warn(f'Field error / Bad Request while liking post for user: {authenticated_user.username}')
+            return log_field_error(
+                {"postId": ["This field is required.", "Field type must be int."]}
+            )
+            
+        post_obj = Post.objects.get(id=post_id)
+
+        has_already_liked = Like.objects.get(postId=post_obj, liked_by=authenticated_user)
+        if has_already_liked:
+            has_already_liked.delete()
+            info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
+            return generic_response(
+                    success=True,
+                    message='Post Unliked',
+                    status=status.HTTP_200_OK
+                )
+    
+    except Post.DoesNotExist:
+        info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
+        return post_not_found_error()
+    
+    except Like.DoesNotExist:
+        Like.objects.create(postId=post_obj, liked_by=authenticated_user)
+        info_logger.info(f'User: {authenticated_user.username} liked post: {post_id}')
+        return generic_response(
+                    success=True,
+                    message='Post Liked',
+                    status=status.HTTP_200_OK
+                )
+    
+    except Exception as err:
+        return log_exception(err)
+
+
+@api_view(["POST"])
+def comment_on_post(request):
+    """
+    Comment on post.
+    """
+    try:
+        authenticated_user = request.user
+        post_id = request.data.get("postId")
+        comment = request.data.get("comment")
+
+        if not (post_id and comment and isinstance(post_id, int) and isinstance(comment, str)):
+            info_logger.warn(f'Field error / Bad Request while commenting on post for user: {authenticated_user.username}')
+            return log_field_error(
+                {
+                "postId": ["This field is required.", "Field type must be int."],
+                "comment": ["This field is required.", "Field type must be str."]
+                }
+            )
+            
+        post_obj = Post.objects.get(id=post_id)
+
+        Comment.objects.create(comment=comment, postId=post_obj, commented_by=authenticated_user)
+        info_logger.info(f'User: {authenticated_user.username} commented on post: {post_id}')
+        return generic_response(
+                success=True,
+                message='Comment Posted',
+                status=status.HTTP_200_OK
+            )
+    
+    except Post.DoesNotExist:
+        info_logger.warn(f'User: {authenticated_user.username} tried to comment on non existing post: {post_id}')
+        return post_not_found_error()
+    
+    except Exception as err:
+        return log_exception(err)

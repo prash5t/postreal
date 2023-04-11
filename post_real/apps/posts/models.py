@@ -10,4 +10,21 @@ class Post(TimeStamp):
     caption = models.CharField(max_length=100)
     description = models.TextField(max_length=500, null=True, blank=True)
     postPicUrl = models.ImageField(upload_to='mediafiles/postPics/', validators=[validate_image_size, FileExtensionValidator(allowed_extensions=['jpeg', 'jpg', 'png'])])
-    userId = models.ForeignKey(User, on_delete=models.CASCADE)
+    userId = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+
+    def __str__(self):
+        return str(self.pk)
+
+
+class Like(TimeStamp):
+    postId = models.ForeignKey(Post, on_delete=models.CASCADE, db_index=True)
+    liked_by = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True) 
+
+    class Meta:
+        unique_together = ('postId', 'liked_by')
+
+
+class Comment(TimeStamp):
+    comment = models.CharField(max_length=150)
+    postId = models.ForeignKey(Post, on_delete=models.CASCADE, db_index=True)
+    commented_by = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True) 
