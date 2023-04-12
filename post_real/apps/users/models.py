@@ -4,9 +4,11 @@ from PIL import Image
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinLengthValidator, FileExtensionValidator
 
 from post_real.core.image_size_validator import validate_image_size
+from post_real.core.time_stamp_model import TimeStamp
 
 
 class User(AbstractUser):
@@ -48,3 +50,15 @@ class User(AbstractUser):
     #     img.save(self.profilePicUrl.path, quality=30)
     #     img.close()
     #     self.profilePicUrl.close()
+
+
+class Connection(TimeStamp):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_user') 
+    following_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_following_user')  
+
+    class Meta:
+        unique_together = ('user_id', 'following_user_id')
+
+    def clean(self):
+        if self.user_id == self.following_user_id:
+            raise ValidationError("User cannot follow themselves!")

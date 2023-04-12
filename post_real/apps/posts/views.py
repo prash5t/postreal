@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.db import IntegrityError
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, authentication_classes
@@ -41,7 +42,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_201_CREATED
                 )
             
-            info_logger.warn(f'Field error / Bad request while creating post for user: {authenticated_user.username}')
+            info_logger.warn(f'Field error / Bad request from user: {authenticated_user.username} while creating post')
             return log_field_error(serializer.errors)
         
         except Exception as err:
@@ -127,7 +128,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_200_OK
                 )
 
-            info_logger.warn(f'Field error / Bad Request while updating post: {post_obj.id} for user: {authenticated_user.username}')
+            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while updating post: {post_obj.id}')
             return log_field_error(serializer.errors)
         
         except Http404:
@@ -167,37 +168,22 @@ class PostViewSet(viewsets.ModelViewSet):
     
 
 @api_view(["POST"])
-def like_post(request):
+def like_unlike_post(request):
     """
-    Like post with post id.
+    Like/Unlike post with post id.
     """
     try:
         authenticated_user = request.user
         post_id = request.data.get("postId")
 
         if not (post_id and isinstance(post_id, int)) :
-            info_logger.warn(f'Field error / Bad Request while liking post for user: {authenticated_user.username}')
+            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while liking post')
             return log_field_error(
                 {"postId": ["This field is required.", "Field type must be int."]}
             )
             
         post_obj = Post.objects.get(id=post_id)
 
-        has_already_liked = Like.objects.get(postId=post_obj, liked_by=authenticated_user)
-        if has_already_liked:
-            has_already_liked.delete()
-            info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
-            return generic_response(
-                    success=True,
-                    message='Post Unliked',
-                    status=status.HTTP_200_OK
-                )
-    
-    except Post.DoesNotExist:
-        info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
-        return post_not_found_error()
-    
-    except Like.DoesNotExist:
         Like.objects.create(postId=post_obj, liked_by=authenticated_user)
         info_logger.info(f'User: {authenticated_user.username} liked post: {post_id}')
         return generic_response(
@@ -205,6 +191,19 @@ def like_post(request):
                     message='Post Liked',
                     status=status.HTTP_200_OK
                 )
+
+    except IntegrityError:
+        Like.objects.get(postId=post_obj, liked_by=authenticated_user).delete()
+        info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
+        return generic_response(
+                success=True,
+                message='Post Unliked',
+                status=status.HTTP_200_OK
+            )
+    
+    except Post.DoesNotExist:
+        info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
+        return post_not_found_error()
     
     except Exception as err:
         return log_exception(err)
@@ -221,7 +220,7 @@ def comment_on_post(request):
         comment = request.data.get("comment")
 
         if not (post_id and comment and isinstance(post_id, int) and isinstance(comment, str)):
-            info_logger.warn(f'Field error / Bad Request while commenting on post for user: {authenticated_user.username}')
+            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while commenting on post')
             return log_field_error(
                 {
                 "postId": ["This field is required.", "Field type must be int."],
@@ -236,7 +235,7 @@ def comment_on_post(request):
         return generic_response(
                 success=True,
                 message='Comment Posted',
-                status=status.HTTP_200_OK
+                status=status.HTTP_201_CREATED
             )
     
     except Post.DoesNotExist:

@@ -8,6 +8,6 @@ router.register(r'operation', views.PostViewSet, basename="post_operation")
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('like/', views.like_post, name="like_post"),
+    path('like-unlike/', views.like_unlike_post, name="like_unlike_post"),
     path('comment/', views.comment_on_post, name="comment_on_post")
 ]
