@@ -55,9 +55,9 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         try:
             authenticated_user = request.user
-            queryset = authenticated_user.post_set.order_by("-created_at")
+            queryset = authenticated_user.post_user.order_by("-created_at")
 
-            serializer = self.serializer_class(queryset, many=True)
+            serializer = self.serializer_class(queryset, many=True, context={'current_user': authenticated_user})
 
             info_logger.info(f'Posts info requested for user: {authenticated_user.username}')
             return generic_response(
@@ -82,7 +82,7 @@ class PostViewSet(viewsets.ModelViewSet):
             result, has_access = check_user_access_on_post(authenticated_user, post_obj)
             if not has_access: return generic_response(**result)
 
-            serializer = self.serializer_class(post_obj)
+            serializer = self.serializer_class(post_obj, context={'current_user': authenticated_user})
 
             info_logger.info(f'Retrieve post info requested for user: {authenticated_user.username}, post:{post_obj.id}')
             return generic_response(
