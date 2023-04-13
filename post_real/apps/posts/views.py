@@ -2,10 +2,14 @@ from django.http import Http404
 from django.db import IntegrityError
 
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view
 
-from .models import Post, Like, User, Comment
+
+
+from .models import Post, Like, Comment
 from .serializers import PostSerializer
+from post_real.core.validation_form import LikeUnlikeForm, CommentForm
+from post_real.core.query_helper import get_liked_post_of_user
 from post_real.core.authorization import check_user_access_on_post
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, post_not_found_error
 
@@ -35,10 +39,13 @@ class PostViewSet(viewsets.ModelViewSet):
                 serializer.save()
 
                 info_logger.info(f'Post created: {serializer.data.get("id")}')
+                serialized_data = serializer.data
+                serialized_data.pop("total_likes")
+                serialized_data.pop("has_liked")
                 return generic_response(
                     success=True,
                     message='Post Created Successfully',
-                    data=serializer.data,
+                    data=serialized_data,
                     status=status.HTTP_201_CREATED
                 )
             
@@ -55,9 +62,11 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         try:
             authenticated_user = request.user
-            queryset = authenticated_user.post_set.order_by("-created_at")
 
-            serializer = self.serializer_class(queryset, many=True)
+            queryset = authenticated_user.post_user.prefetch_related('like_post').order_by("-created_at") 
+            liked_post_of_user = get_liked_post_of_user(authenticated_user)
+
+            serializer = self.serializer_class(queryset, many=True, context=liked_post_of_user)
 
             info_logger.info(f'Posts info requested for user: {authenticated_user.username}')
             return generic_response(
@@ -79,10 +88,9 @@ class PostViewSet(viewsets.ModelViewSet):
             authenticated_user = request.user
             post_obj = self.get_object()
 
-            result, has_access = check_user_access_on_post(authenticated_user, post_obj)
-            if not has_access: return generic_response(**result)
+            liked_post_of_user = get_liked_post_of_user(authenticated_user)
 
-            serializer = self.serializer_class(post_obj)
+            serializer = self.serializer_class(post_obj, context=liked_post_of_user)
 
             info_logger.info(f'Retrieve post info requested for user: {authenticated_user.username}, post:{post_obj.id}')
             return generic_response(
@@ -121,10 +129,13 @@ class PostViewSet(viewsets.ModelViewSet):
                 self.perform_update(serializer)
 
                 info_logger.info(f'Post info updated for user: {authenticated_user.username}, post: {post_obj.id}')
+                serialized_data = serializer.data
+                serialized_data.pop("total_likes")
+                serialized_data.pop("has_liked")
                 return generic_response(
                     success=True,
                     message='Post Updated',
-                    data=serializer.data,
+                    data=serialized_data,
                     status=status.HTTP_200_OK
                 )
 
@@ -174,17 +185,16 @@ def like_unlike_post(request):
     """
     try:
         authenticated_user = request.user
-        post_id = request.data.get("postId")
-
-        if not (post_id and isinstance(post_id, int)) :
+        form = LikeUnlikeForm(request.data)
+        if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while liking post')
             return log_field_error(
                 {"postId": ["This field is required.", "Field type must be int."]}
             )
-            
-        post_obj = Post.objects.get(id=post_id)
+        
+        post_id = form.cleaned_data["postId"]
 
-        Like.objects.create(postId=post_obj, liked_by=authenticated_user)
+        Like.objects.create(postId_id=post_id, liked_by=authenticated_user)
         info_logger.info(f'User: {authenticated_user.username} liked post: {post_id}')
         return generic_response(
                     success=True,
@@ -193,17 +203,18 @@ def like_unlike_post(request):
                 )
 
     except IntegrityError:
-        Like.objects.get(postId=post_obj, liked_by=authenticated_user).delete()
-        info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
-        return generic_response(
-                success=True,
-                message='Post Unliked',
-                status=status.HTTP_200_OK
-            )
+        try: 
+            Like.objects.get(postId_id=post_id, liked_by=authenticated_user).delete()
+            info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
+            return generic_response(
+                    success=True,
+                    message='Post Unliked',
+                    status=status.HTTP_200_OK
+                )
     
-    except Post.DoesNotExist:
-        info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
-        return post_not_found_error()
+        except Like.DoesNotExist:
+            info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
+            return post_not_found_error()
     
     except Exception as err:
         return log_exception(err)
@@ -216,21 +227,21 @@ def comment_on_post(request):
     """
     try:
         authenticated_user = request.user
-        post_id = request.data.get("postId")
-        comment = request.data.get("comment")
 
-        if not (post_id and comment and isinstance(post_id, int) and isinstance(comment, str)):
+        form = CommentForm(request.data)
+        if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while commenting on post')
             return log_field_error(
                 {
                 "postId": ["This field is required.", "Field type must be int."],
-                "comment": ["This field is required.", "Field type must be str."]
+                "comment": ["This field is required.", "Field type must be str.", "Max-lenght: 150"]
                 }
             )
-            
-        post_obj = Post.objects.get(id=post_id)
+        
+        post_id = form.cleaned_data["postId"]
+        comment = form.cleaned_data["comment"]
 
-        Comment.objects.create(comment=comment, postId=post_obj, commented_by=authenticated_user)
+        Comment.objects.create(comment=comment, postId_id=post_id, commented_by=authenticated_user)
         info_logger.info(f'User: {authenticated_user.username} commented on post: {post_id}')
         return generic_response(
                 success=True,
@@ -238,7 +249,7 @@ def comment_on_post(request):
                 status=status.HTTP_201_CREATED
             )
     
-    except Post.DoesNotExist:
+    except IntegrityError:
         info_logger.warn(f'User: {authenticated_user.username} tried to comment on non existing post: {post_id}')
         return post_not_found_error()
     

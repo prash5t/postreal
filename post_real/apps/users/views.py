@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view
 
+
 from .models import User, Connection
 from .serializers import UserSerializer
+from post_real.core.validation_form import FollowUnfollowForm
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
@@ -129,40 +131,41 @@ def follow_unfollow_user(request):
     """
     try:
         authenticated_user = request.user
-        following_user_id = request.data.get("userId")
 
-        if not (following_user_id and isinstance(following_user_id, str)) :
+        form = FollowUnfollowForm(request.data)
+        if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while following user')
             return log_field_error(
-                {"userId": ["This field is required.", "Field type must be str."]}
+                {"userId": ["This field is required.", "Field type must be uuid."]}
             )
-            
-        following_user_obj = User.objects.get(id=following_user_id)
 
-        Connection.objects.create(user_id=authenticated_user, following_user_id=following_user_obj)
-        info_logger.info(f'User: {authenticated_user.username} started following user: {following_user_obj.username}')
+        following_user_id = form.cleaned_data['userId']
+            
+        connection_obj = Connection.objects.create(user_id=authenticated_user, following_user_id_id=following_user_id)
+        info_logger.info(f'User: {authenticated_user.username} started following user: {connection_obj.following_user_id.username}')
         return generic_response(
                 success=True,
-                message='Started Following User @%s' % following_user_obj.username,
+                message='Started Following Given User @%s' % connection_obj.following_user_id.username,
                 status=status.HTTP_200_OK
             )
     
     except IntegrityError:
-        Connection.objects.get(user_id=authenticated_user, following_user_id=following_user_obj).delete()
-        info_logger.info(f'User: {authenticated_user.username} unfollowed user: {following_user_obj.username}')
-        return generic_response(
-                success=True,
-                message='Unfollowed User @%s' % following_user_obj.username,
-                status=status.HTTP_200_OK
-            )
+        try: 
+            Connection.objects.get(user_id=authenticated_user, following_user_id_id=following_user_id).delete()
+            info_logger.info(f'User: {authenticated_user.username} unfollowed user: {following_user_id}')
+            return generic_response(
+                    success=True,
+                    message='Unfollowed Given User',
+                    status=status.HTTP_200_OK
+                )
 
-    except User.DoesNotExist:
-        info_logger.warn(f'User: {authenticated_user.username} tried to follow non existing user: {following_user_id}')
-        return generic_response(
-            success=False,
-            message="User Doesn't Exists!",
-            status=status.HTTP_404_NOT_FOUND
-        )
+        except Connection.DoesNotExist:
+            info_logger.warn(f'User: {authenticated_user.username} tried to follow non existing user: {following_user_id}')
+            return generic_response(
+                success=False,
+                message="User Doesn't Exists!",
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     except Exception as err:
         return log_exception(err)
