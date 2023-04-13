@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/constants/routes.dart';
+import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/user.dart';
 import 'package:postreal/presentation/shared_layout/feed_screen.dart';
+import 'package:postreal/presentation/shared_layout/notification_screen.dart';
 import 'package:postreal/presentation/shared_layout/profile_screen.dart';
 import 'package:postreal/presentation/shared_layout/search_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
@@ -81,11 +83,28 @@ class _HomeScreenState extends State<HomeScreen> {
         bottomNavigationBar: CupertinoTabBar(
             currentIndex: _navAt,
             onTap: _navigationTapped,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home)),
-              BottomNavigationBarItem(icon: Icon(Icons.search)),
-              BottomNavigationBarItem(icon: Icon(Icons.notifications)),
-              BottomNavigationBarItem(icon: Icon(Icons.person)),
+            items: [
+              const BottomNavigationBarItem(icon: Icon(Icons.home)),
+              const BottomNavigationBarItem(icon: Icon(Icons.search)),
+              BottomNavigationBarItem(
+                  icon: StreamBuilder(
+                      stream: FirestoreMethods().notificationStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox();
+                        }
+                        // querying to get the length of notifications which are not read.
+                        final notificationCount = snapshot.data!.docs
+                            .where((doc) => doc.data()['isRead'] == false)
+                            .toList()
+                            .length;
+                        return Badge(
+                            label: Text(notificationCount.toString()),
+                            isLabelVisible: notificationCount > 0,
+                            child: const Icon(Icons.notifications));
+                      })),
+              const BottomNavigationBarItem(icon: Icon(Icons.person)),
             ]),
         body: PageView(
           physics: const NeverScrollableScrollPhysics(),
@@ -94,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const FeedScreen(),
             const SearchScreen(),
-            const Text("Notification Page"),
+            const NotificationScreen(),
             ProfileScreen(uIdOfProfileOwner: user.uid),
           ],
         ),

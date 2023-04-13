@@ -87,7 +87,11 @@ class _PostCardState extends State<PostCard> {
           GestureDetector(
             onDoubleTap: () async {
               bool isLikedOrUnliked = await FirestoreMethods().likeUnlikePost(
-                  widget.postData.postId, user.uid, widget.postData.likes);
+                  widget.postData.postId,
+                  user.uid,
+                  widget.postData.likes,
+                  widget.postData.uid,
+                  widget.postData.postPicUrl);
               if (!isLikedOrUnliked) {
                 Fluttertoast.showToast(
                     msg: "Error: Could not perform like/unlike request");
@@ -145,7 +149,9 @@ class _PostCardState extends State<PostCard> {
                       await FirestoreMethods().likeUnlikePost(
                           widget.postData.postId,
                           user.uid,
-                          widget.postData.likes);
+                          widget.postData.likes,
+                          widget.postData.uid,
+                          widget.postData.postPicUrl);
                     },
                     icon: widget.postData.likes.contains(user.uid)
                         ? const Icon(

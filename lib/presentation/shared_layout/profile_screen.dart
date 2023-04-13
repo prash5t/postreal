@@ -126,157 +126,160 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: SafeArea(
             child: RefreshIndicator(
               onRefresh: fetchDataOfProfileOwner,
-              child: ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (_) {
-                                      return StalkDPWidget(
-                                        profilePicUrl:
-                                            dataOfProfileOwner['profilePicUrl'],
-                                      );
-                                    });
-                              },
-                              child: CircleAvatar(
-                                radius: 40,
-                                backgroundColor: Colors.grey,
-                                backgroundImage: NetworkImage(
-                                    dataOfProfileOwner['profilePicUrl']),
-                              ),
-                            ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  buildProfileStatColumn(
-                                      totalPostsOfThisUser, "Posts"),
-                                  buildProfileStatColumn(
-                                      dataOfProfileOwner['followers'].length,
-                                      'Followers'),
-                                  buildProfileStatColumn(
-                                      dataOfProfileOwner['following'].length,
-                                      "Following")
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(dataOfProfileOwner['bio']),
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              onPressed: () async {
-                                if (isProfileOwner) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) => EditProfileScreen(
-                                            dataofProfileOwner:
-                                                dataOfProfileOwner)),
-                                  );
-                                } else {
-                                  setState(() {
-                                    followUnfollowTaskGoingOn = true;
-                                  });
-                                  alreadyFollowed
-                                      ? _firestoreMethods.unFollowUser(
-                                          stalkedPersonId:
-                                              widget.uIdOfProfileOwner,
-                                          stalkerId: loggedInUser.uid)
-                                      : _firestoreMethods.followUser(
-                                          stalkedPersonId:
-                                              widget.uIdOfProfileOwner,
-                                          stalkerId: loggedInUser.uid);
-
-                                  await Provider.of<UserProvider>(context,
-                                          listen: false)
-                                      .refreshUser();
-                                  setState(() {
-                                    fetchDataOfProfileOwner();
-                                    followUnfollowTaskGoingOn = false;
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8)),
-                                  backgroundColor: isProfileOwner
-                                      ? Colors.grey
-                                      : alreadyFollowed
-                                          ? Colors.grey
-                                          : Colors.blueAccent),
-                              child: followUnfollowTaskGoingOn
-                                  ? const LinearProgressIndicator()
-                                  : Text(
-                                      isProfileOwner
-                                          ? "Edit Profile"
-                                          : alreadyFollowed
-                                              ? "Unfollow @${dataOfProfileOwner['username']}"
-                                              : "Follow @${dataOfProfileOwner['username']}",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    )),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(
-                    color: Colors.grey,
-                    thickness: 0.8,
-                  ),
-                  FutureBuilder(
-                      future: FirebaseFirestore.instance
-                          .collection('posts')
-                          .where('uid', isEqualTo: widget.uIdOfProfileOwner)
-                          .get(),
-                      builder: ((context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        return GridView.builder(
-                            itemCount: snapshot.data!.docs.length,
-                            shrinkWrap: true,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
-                                    crossAxisSpacing: 3,
-                                    mainAxisSpacing: 1,
-                                    childAspectRatio: 1),
-                            itemBuilder: ((context, index) {
-                              Post post =
-                                  Post.fromSnap(snapshot.data!.docs[index]);
-                              return GestureDetector(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              GestureDetector(
                                 onTap: () {
-                                  postModalBottomSheet(
+                                  showDialog(
                                       context: context,
-                                      post: post,
-                                      currentUserId: loggedInUser.uid);
+                                      builder: (_) {
+                                        return StalkDPWidget(
+                                          profilePicUrl: dataOfProfileOwner[
+                                              'profilePicUrl'],
+                                        );
+                                      });
                                 },
-                                child: Image(
-                                  image: NetworkImage(
-                                    post.postPicUrl,
-                                  ),
-                                  fit: BoxFit.cover,
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Colors.grey,
+                                  backgroundImage: NetworkImage(
+                                      dataOfProfileOwner['profilePicUrl']),
                                 ),
-                              );
-                            }));
-                      }))
-                ],
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    buildProfileStatColumn(
+                                        totalPostsOfThisUser, "Posts"),
+                                    buildProfileStatColumn(
+                                        dataOfProfileOwner['followers'].length,
+                                        'Followers'),
+                                    buildProfileStatColumn(
+                                        dataOfProfileOwner['following'].length,
+                                        "Following")
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(dataOfProfileOwner['bio']),
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                                onPressed: () async {
+                                  if (isProfileOwner) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              EditProfileScreen(
+                                                  dataofProfileOwner:
+                                                      dataOfProfileOwner)),
+                                    );
+                                  } else {
+                                    setState(() {
+                                      followUnfollowTaskGoingOn = true;
+                                    });
+                                    alreadyFollowed
+                                        ? _firestoreMethods.unFollowUser(
+                                            stalkedPersonId:
+                                                widget.uIdOfProfileOwner,
+                                            stalkerId: loggedInUser.uid)
+                                        : _firestoreMethods.followUser(
+                                            stalkedPersonId:
+                                                widget.uIdOfProfileOwner,
+                                            stalkerId: loggedInUser.uid);
+
+                                    await Provider.of<UserProvider>(context,
+                                            listen: false)
+                                        .refreshUser();
+                                    setState(() {
+                                      fetchDataOfProfileOwner();
+                                      followUnfollowTaskGoingOn = false;
+                                    });
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8)),
+                                    backgroundColor: isProfileOwner
+                                        ? Colors.grey
+                                        : alreadyFollowed
+                                            ? Colors.grey
+                                            : Colors.blueAccent),
+                                child: followUnfollowTaskGoingOn
+                                    ? const LinearProgressIndicator()
+                                    : Text(
+                                        isProfileOwner
+                                            ? "Edit Profile"
+                                            : alreadyFollowed
+                                                ? "Unfollow @${dataOfProfileOwner['username']}"
+                                                : "Follow @${dataOfProfileOwner['username']}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white),
+                                      )),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      color: Colors.grey,
+                      thickness: 0.8,
+                    ),
+                    FutureBuilder(
+                        future: FirebaseFirestore.instance
+                            .collection('posts')
+                            .where('uid', isEqualTo: widget.uIdOfProfileOwner)
+                            .get(),
+                        builder: ((context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          return GridView.builder(
+                              itemCount: snapshot.data!.docs.length,
+                              shrinkWrap: true,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 3,
+                                      mainAxisSpacing: 1,
+                                      childAspectRatio: 1),
+                              itemBuilder: ((context, index) {
+                                Post post =
+                                    Post.fromSnap(snapshot.data!.docs[index]);
+                                return GestureDetector(
+                                  onTap: () {
+                                    postModalBottomSheet(
+                                        context: context,
+                                        post: post,
+                                        currentUserId: loggedInUser.uid);
+                                  },
+                                  child: Image(
+                                    image: NetworkImage(
+                                      post.postPicUrl,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              }));
+                        }))
+                  ],
+                ),
               ),
             ),
           ),

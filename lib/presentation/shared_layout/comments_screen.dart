@@ -110,10 +110,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
                                                       widget.postData.postId,
                                                   text:
                                                       _commentField.text.trim(),
-                                                  uid: user.uid,
+                                                  commentatorId: user.uid,
+                                                  posterId: widget.postData.uid,
                                                   username: user.username,
                                                   profilePicUrl:
-                                                      user.profilePicUrl);
+                                                      user.profilePicUrl,
+                                                  postPicUrl: widget
+                                                      .postData.postPicUrl);
 
                                       _commentField.text = "";
                                       if (result == "success") {

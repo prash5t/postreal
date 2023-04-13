@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:postreal/data/auth_methods.dart';
 import 'package:postreal/data/models/comment.dart';
+import 'package:postreal/data/models/notification.dart';
 import 'package:postreal/data/models/post.dart';
 import 'package:postreal/data/models/user.dart' as model;
 import 'package:postreal/data/storage_methods.dart';
@@ -11,13 +12,66 @@ class FirestoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthMethods _authMethods = AuthMethods();
 
+  //function to mark unread notifications as read
+  Future<void> markNotificationsAsRead() async {
+    final notificationsRef = _firestore
+        .collection('notifications')
+        .doc(_authMethods.auth.currentUser!.uid)
+        .collection('userNotifications');
+    final batch = _firestore.batch();
+    final querySnapshot =
+        await notificationsRef.where('isRead', isEqualTo: false).get();
+    for (var doc in querySnapshot.docs) {
+      batch.update(doc.reference, {'isRead': true});
+    }
+    await batch.commit();
+  }
+
+  // function to get stream of user's notifications
+  Stream notificationStream() {
+    final user = _authMethods.auth.currentUser!;
+    return _firestore
+        .collection('notifications')
+        .doc(user.uid)
+        .collection('userNotifications')
+        .orderBy('timeStamp', descending: true)
+        .snapshots();
+  }
+
+  //function to create new notification
+  Future<void> addNotificationToReceiver(
+      {required UserNotification notification,
+      required String receiverId}) async {
+    await _firestore
+        .collection('notifications')
+        .doc(receiverId)
+        .collection('userNotifications')
+        .add(notification.toJson());
+  }
+
+  //function to delete all notifications of a user
+  Future<void> deleteAllNotifications() async {
+    final notificationDocs = await _firestore
+        .collection('notifications')
+        .doc(_authMethods.auth.currentUser!.uid)
+        .collection('userNotifications')
+        .get();
+
+    final batch = _firestore.batch();
+
+    for (var doc in notificationDocs.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+  }
+
   // function to add new post/photo
   Future<String> addNewPost({
     required File img,
     String? caption,
     required model.User user,
   }) async {
-    String result;
     try {
       // to upload new picture
       String pictureUrl = await StorageMethods()
@@ -36,12 +90,10 @@ class FirestoreMethods {
         postId: const Uuid().v1(),
       );
       await _firestore.collection('posts').doc(post.postId).set(post.toJson());
-
-      result = "success";
+      return "success";
     } catch (err) {
-      result = err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
+      return err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
     }
-    return result;
   }
 
   // function to update username
@@ -71,16 +123,31 @@ class FirestoreMethods {
   }
 
   // function to like or unlike a post
-  Future<bool> likeUnlikePost(String postId, String uid, List likes) async {
+  Future<bool> likeUnlikePost(String postId, String likerId, List likes,
+      String posterId, String postPicUrl) async {
     try {
-      if (likes.contains(uid)) {
+      if (likes.contains(likerId)) {
         await _firestore.collection('posts').doc(postId).update({
-          'likes': FieldValue.arrayRemove([uid]),
+          'likes': FieldValue.arrayRemove([likerId]),
         });
       } else {
         await _firestore.collection('posts').doc(postId).update({
-          'likes': FieldValue.arrayUnion([uid]),
+          'likes': FieldValue.arrayUnion([likerId]),
         });
+        // after liking, we also need to add notification to receiver
+        if (likerId != posterId) {
+          model.User liker = await _authMethods.getUserDetails();
+          UserNotification notification = UserNotification(
+              senderId: likerId,
+              senderUsername: liker.username,
+              senderProfilePic: liker.profilePicUrl,
+              notificationType: "like",
+              timeStamp: DateTime.now(),
+              postId: postId,
+              postPicUrl: postPicUrl);
+          await addNotificationToReceiver(
+              notification: notification, receiverId: posterId);
+        }
       }
     } catch (err) {
       return false;
@@ -105,6 +172,18 @@ class FirestoreMethods {
       'following': FieldValue.arrayUnion([stalkedPersonId])
     });
     await batch.commit();
+
+    // after following, need to send notification
+    model.User follower = await _authMethods.getUserDetails();
+    UserNotification notification = UserNotification(
+      senderId: stalkerId,
+      senderUsername: follower.username,
+      senderProfilePic: follower.profilePicUrl,
+      notificationType: "follow",
+      timeStamp: DateTime.now(),
+    );
+    await addNotificationToReceiver(
+        notification: notification, receiverId: stalkedPersonId);
   }
 
   // function to unfollow user
@@ -130,17 +209,18 @@ class FirestoreMethods {
   Future<String> commentOnPost(
       {required String postId,
       required String text,
-      required String uid,
+      required String commentatorId,
+      required String posterId,
       required String username,
-      required String profilePicUrl}) async {
-    String result;
+      required String profilePicUrl,
+      required String postPicUrl}) async {
     try {
       Comment comment = Comment(
           text: text.trim(),
           commentId: const Uuid().v1(),
           commentatorProfilePicUrl: profilePicUrl,
           commentatorUsername: username,
-          commentatorId: uid,
+          commentatorId: commentatorId,
           dateCommented: DateTime.now());
       await _firestore
           .collection('posts')
@@ -148,11 +228,25 @@ class FirestoreMethods {
           .collection('comments')
           .doc(comment.commentId)
           .set(comment.toJson());
-      result = "success";
+
+      // after commenting, we need to add a comment notification
+      if (commentatorId != posterId) {
+        UserNotification notification = UserNotification(
+            senderId: commentatorId,
+            senderUsername: username,
+            senderProfilePic: profilePicUrl,
+            notificationType: "comment",
+            timeStamp: DateTime.now(),
+            postId: postId,
+            postPicUrl: postPicUrl);
+        await addNotificationToReceiver(
+            notification: notification, receiverId: posterId);
+      }
+
+      return "success";
     } catch (err) {
-      result = err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
+      return err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
     }
-    return result;
   }
 
   //function to delete a comment on a post
