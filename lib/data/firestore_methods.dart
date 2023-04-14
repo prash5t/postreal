@@ -49,11 +49,38 @@ class FirestoreMethods {
   Future<void> addNotificationToReceiver(
       {required UserNotification notification,
       required String receiverId}) async {
-    await _firestore
-        .collection('notifications')
-        .doc(receiverId)
-        .collection('userNotifications')
-        .add(notification.toJson());
+    Future<void> addNotif() async {
+      await _firestore
+          .collection('notifications')
+          .doc(receiverId)
+          .collection('userNotifications')
+          .doc(notification.notificationId)
+          .set(notification.toJson());
+    }
+
+    if (notification.notificationType == "comment") {
+      addNotif();
+    } else {
+      //if its not comment notfication, needs to check
+      //if notificaiton of this activity already exists or not
+      //to prevent spamming notifications
+      DocumentSnapshot notificaitonSnap = await _firestore
+          .collection('notifications')
+          .doc(receiverId)
+          .collection('userNotifications')
+          .doc(notification.notificationId)
+          .get();
+      if (notificaitonSnap.exists) {
+        UserNotification notif = UserNotification.fromSnap(notificaitonSnap);
+        // if prev notification of this activity was not within an hour
+        // then only send notification
+        if (DateTime.now().difference(notif.timeStamp).inHours > 1) {
+          addNotif();
+        }
+      } else {
+        addNotif();
+      }
+    }
   }
 
   //function to delete all notifications of a user
@@ -145,6 +172,7 @@ class FirestoreMethods {
         if (likerId != posterId) {
           model.User liker = await _authMethods.getUserDetails();
           UserNotification notification = UserNotification(
+              notificationId: "$likerId$postId",
               senderId: likerId,
               senderUsername: liker.username,
               senderProfilePic: liker.profilePicUrl,
@@ -183,6 +211,7 @@ class FirestoreMethods {
     // after following, need to send notification
     model.User follower = await _authMethods.getUserDetails();
     UserNotification notification = UserNotification(
+      notificationId: stalkerId,
       senderId: stalkerId,
       senderUsername: follower.username,
       senderProfilePic: follower.profilePicUrl,
@@ -239,6 +268,7 @@ class FirestoreMethods {
       // after commenting, we need to add a comment notification
       if (commentatorId != posterId) {
         UserNotification notification = UserNotification(
+            notificationId: "$commentatorId$postId",
             senderId: commentatorId,
             senderUsername: username,
             senderProfilePic: profilePicUrl,
@@ -249,7 +279,6 @@ class FirestoreMethods {
         await addNotificationToReceiver(
             notification: notification, receiverId: posterId);
       }
-
       return "success";
     } catch (err) {
       return err.toString().replaceAll(RegExp(r'\[[^\]]+\]'), '');
