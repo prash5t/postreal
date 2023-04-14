@@ -5,10 +5,6 @@ class FollowUnfollowForm(forms.Form):
     userId = forms.UUIDField(required=True)
 
 
-class LikeUnlikeForm(forms.Form):
-    postId = forms.IntegerField(required=True)
-
-
 class CommentForm(forms.Form):
     postId = forms.IntegerField(required=True)
     comment = forms.CharField(max_length=150, required=True)
