@@ -172,7 +172,7 @@ class FirestoreMethods {
         if (likerId != posterId) {
           model.User liker = await _authMethods.getUserDetails();
           UserNotification notification = UserNotification(
-              notificationId: "$likerId$postId",
+              notificationId: "like$likerId$postId",
               senderId: likerId,
               senderUsername: liker.username,
               senderProfilePic: liker.profilePicUrl,
@@ -268,7 +268,7 @@ class FirestoreMethods {
       // after commenting, we need to add a comment notification
       if (commentatorId != posterId) {
         UserNotification notification = UserNotification(
-            notificationId: "$commentatorId$postId",
+            notificationId: "comment$commentatorId$postId",
             senderId: commentatorId,
             senderUsername: username,
             senderProfilePic: profilePicUrl,
