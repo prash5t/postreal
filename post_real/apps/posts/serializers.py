@@ -76,6 +76,7 @@ class LikeSerializer(serializers.ModelSerializer):
     userId = serializers.ReadOnlyField(source="liked_by_id")
     username = serializers.ReadOnlyField(source="liked_by.username")
     profilePicUrl = serializers.ImageField(source="liked_by.profilePicUrl", read_only=True)
+
     class Meta:
         model = Like
         fields = [
@@ -90,6 +91,7 @@ class CommentSerializer(serializers.ModelSerializer):
     userId = serializers.ReadOnlyField(source="commented_by_id")
     username = serializers.ReadOnlyField(source="commented_by.username")
     profilePicUrl = serializers.ImageField(source="commented_by.profilePicUrl", read_only=True)
+    
     class Meta:
         model = Comment
         fields = [

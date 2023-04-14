@@ -58,7 +58,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
         try:
             authenticated_user = request.user
 
-            serializer = self.serializer_class(authenticated_user)
+            serializer = self.serializer_class(authenticated_user, context={"data":"data"})
 
             info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
             return generic_response(
