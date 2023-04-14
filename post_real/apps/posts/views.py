@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.db import IntegrityError
+from django.db.models import Count, Sum
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
@@ -7,7 +8,7 @@ from rest_framework.decorators import api_view
 
 
 from .models import Post, Like, Comment
-from .serializers import PostSerializer
+from .serializers import PostSerializer, LikeSerializer
 from post_real.core.validation_form import LikeUnlikeForm, CommentForm
 from post_real.core.query_helper import get_liked_post_of_user
 from post_real.core.authorization import check_user_access_on_post
@@ -215,6 +216,26 @@ def like_unlike_post(request):
         except Like.DoesNotExist:
             info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
             return post_not_found_error()
+    
+    except Exception as err:
+        return log_exception(err)
+
+
+@api_view(["GET"])
+def like_info(request, postId):
+    """
+    Get total likes and users who liked the post.
+    """
+    try:
+        qs = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        serializer = LikeSerializer(qs, many=True)
+        info_logger.info(f'Like info requested by user: {request.user.username} for post: {postId}')
+        return generic_response(
+                    success=True,
+                    message='Users who liked post',
+                    data=serializer.data,
+                    status=status.HTTP_200_OK
+                )
     
     except Exception as err:
         return log_exception(err)
