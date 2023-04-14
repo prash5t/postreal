@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 
 
 from .models import Connection
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ConnectionSerializer
 from post_real.core.validation_form import FollowUnfollowForm
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
@@ -167,5 +167,34 @@ def follow_unfollow_user(request, userId):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    except Exception as err:
+        return log_exception(err)
+
+
+@api_view(["GET"])
+def follower_info(request, userId):
+    """
+    Get followers info of user.
+    """
+    try:
+        form = FollowUnfollowForm({"userId":userId})
+        if not form.is_valid():
+            info_logger.warn(f'Field error / Bad Request from user: {request.user.username} while requesting followers info.')
+            return log_field_error(
+                {"userId": ["Invalid uuid!"]}
+            )
+        
+        userId = form.cleaned_data['userId']
+        qs = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
+
+        serializer = ConnectionSerializer(qs, many=True)
+        info_logger.info(f'Follower info requested by user: {request.user.username} of user: {userId}')
+        return generic_response(
+                    success=True,
+                    message="Followers Info",
+                    data=serializer.data,
+                    status=status.HTTP_200_OK
+                )
+    
     except Exception as err:
         return log_exception(err)
