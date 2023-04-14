@@ -7,8 +7,6 @@ abstract class AddPhotoEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// class DissmissAddPhotoEvent extends AddPhotoEvent {}
-
 class AddPhotoInitialEvent extends AddPhotoEvent {}
 
 class PostClickedEvent extends AddPhotoEvent {
