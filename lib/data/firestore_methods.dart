@@ -12,6 +12,13 @@ class FirestoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthMethods _authMethods = AuthMethods();
 
+  //function to get data of a particular post
+  Future<Post> getPostData(String postId) async {
+    DocumentSnapshot postSnap =
+        await _firestore.collection('posts').doc(postId).get();
+    return Post.fromSnap(postSnap);
+  }
+
   //function to mark unread notifications as read
   Future<void> markNotificationsAsRead() async {
     final notificationsRef = _firestore

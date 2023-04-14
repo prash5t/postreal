@@ -5,6 +5,7 @@ import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/constants/routes.dart';
 import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/user.dart';
+import 'package:postreal/main.dart';
 import 'package:postreal/presentation/shared_layout/feed_screen.dart';
 import 'package:postreal/presentation/shared_layout/notification_screen.dart';
 import 'package:postreal/presentation/shared_layout/profile_screen.dart';
@@ -59,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: () async {
         bool? shouldExit = await booleanBottomSheet(
-            context: context,
+            context: navKey.currentContext!,
             titleText: closeAppTitle,
             boolTrueText: "Close PostReal");
 
@@ -74,7 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: _navAt == 3
             ? FloatingActionButton.extended(
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.addPostScreen);
+                  Navigator.pushNamed(
+                      navKey.currentContext!, AppRoutes.addPostScreen);
                 },
                 label: const Text("Post real"),
                 icon: const Icon(Icons.add_a_photo),

@@ -5,6 +5,7 @@ import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/presentation/shared_layout/home_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/custom_text.dart';
 import 'package:postreal/utils/validator.dart';
 import 'package:provider/provider.dart';
 import '../../constants/routes.dart';
@@ -111,11 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: (state is LoadingState)
                       ? const LinearProgressIndicator()
-                      : const Text(
-                          "Login",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        )),
+                      : const CustomText(
+                          text: "Login", isBold: true, size: 18)),
             ),
           ),
           SizedBox(height: size.height * 0.04),

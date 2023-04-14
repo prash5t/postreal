@@ -3,9 +3,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/comment.dart';
-import 'package:postreal/presentation/shared_layout/profile_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/utils/date_to_string.dart';
+import 'package:postreal/utils/take_to_profile.dart';
 
 class CommentCard extends StatefulWidget {
   final Comment commentData;
@@ -37,12 +37,7 @@ class _CommentCardState extends State<CommentCard> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProfileScreen(
-                  uIdOfProfileOwner: widget.commentData.commentatorId),
-            ),
-          );
+          navigateToProfile(widget.commentData.commentatorId);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

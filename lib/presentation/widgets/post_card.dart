@@ -11,6 +11,7 @@ import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/comments_buttom_sheet.dart';
 import 'package:postreal/presentation/widgets/like_animation.dart';
 import 'package:postreal/utils/date_to_string.dart';
+import 'package:postreal/utils/take_to_profile.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/user.dart';
 
@@ -46,11 +47,7 @@ class _PostCardState extends State<PostCard> {
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => ProfileScreen(
-                          uIdOfProfileOwner: widget.postData.uid)),
-                );
+                navigateToProfile(widget.postData.uid);
               },
               child: Row(
                 children: [

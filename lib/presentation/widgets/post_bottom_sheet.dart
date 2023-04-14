@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pinch_zoom/pinch_zoom.dart';
 import 'package:postreal/constants/presentation_constants.dart';
@@ -34,7 +35,7 @@ Future<dynamic> postModalBottomSheet(
               child: Center(
                   child: Container(color: Colors.grey, width: 150, height: 4)),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             CustomText(text: dateToString(post.datePublished), isBold: true),
             ListTile(
               leading: CircleAvatar(
@@ -84,7 +85,7 @@ Future<dynamic> postModalBottomSheet(
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 30.0, top: 15),
+              padding: EdgeInsets.only(bottom: 30.h, top: 15.h),
               child: Row(
                 children: [
                   Expanded(
