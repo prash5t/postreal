@@ -1,6 +1,5 @@
 from django.http import Http404
 from django.db import IntegrityError
-from django.db.models import Count, Sum
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
@@ -9,7 +8,7 @@ from rest_framework.decorators import api_view
 
 from .models import Post, Like, Comment
 from .serializers import PostSerializer, LikeSerializer
-from post_real.core.validation_form import LikeUnlikeForm, CommentForm
+from post_real.core.validation_form import CommentForm
 from post_real.core.query_helper import get_liked_post_of_user
 from post_real.core.authorization import check_user_access_on_post
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error, post_not_found_error
@@ -179,24 +178,16 @@ class PostViewSet(viewsets.ModelViewSet):
             return log_exception(err)
     
 
-@api_view(["POST"])
-def like_unlike_post(request):
+@api_view(["GET"])
+def like_unlike_post(request, postId):
     """
     Like/Unlike post with post id.
     """
     try:
         authenticated_user = request.user
-        form = LikeUnlikeForm(request.data)
-        if not form.is_valid():
-            info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while liking post')
-            return log_field_error(
-                {"postId": ["This field is required.", "Field type must be int."]}
-            )
         
-        post_id = form.cleaned_data["postId"]
-
-        Like.objects.create(postId_id=post_id, liked_by=authenticated_user)
-        info_logger.info(f'User: {authenticated_user.username} liked post: {post_id}')
+        Like.objects.create(postId_id=postId, liked_by=authenticated_user)
+        info_logger.info(f'User: {authenticated_user.username} liked post: {postId}')
         return generic_response(
                     success=True,
                     message='Post Liked',
@@ -205,8 +196,8 @@ def like_unlike_post(request):
 
     except IntegrityError:
         try: 
-            Like.objects.get(postId_id=post_id, liked_by=authenticated_user).delete()
-            info_logger.info(f'User: {authenticated_user.username} unliked post: {post_id}')
+            Like.objects.get(postId_id=postId, liked_by=authenticated_user).delete()
+            info_logger.info(f'User: {authenticated_user.username} unliked post: {postId}')
             return generic_response(
                     success=True,
                     message='Post Unliked',
@@ -214,7 +205,7 @@ def like_unlike_post(request):
                 )
     
         except Like.DoesNotExist:
-            info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {post_id}')
+            info_logger.warn(f'User: {authenticated_user.username} tried to like non existing post: {postId}')
             return post_not_found_error()
     
     except Exception as err:
