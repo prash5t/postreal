@@ -9,8 +9,8 @@ Social media app that only allows you to post photos from your camera, not from 
 ##### Features:
 
 - Post picture from camera
-- Like/Comment on Posts
-- Get connected with other users
+- View/Like/Comment on Posts
+- In-app notification for different user activites
 
 ##### Note:
 
