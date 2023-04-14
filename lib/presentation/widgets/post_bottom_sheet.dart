@@ -10,6 +10,7 @@ import 'package:postreal/data/models/post.dart';
 import 'package:postreal/presentation/shared_layout/comments_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/custom_text.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/utils/date_to_string.dart';
 
 Future<dynamic> postModalBottomSheet(
@@ -38,10 +39,8 @@ Future<dynamic> postModalBottomSheet(
             SizedBox(height: 10.h),
             CustomText(text: dateToString(post.datePublished), isBold: true),
             ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.grey,
-                backgroundImage: NetworkImage(post.profilePicUrl),
-              ),
+              leading: UserDP(
+                  dpUrl: post.profilePicUrl, isVerified: post.isVerified),
               title: Text(post.username),
               subtitle: Text(
                 post.caption,

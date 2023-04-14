@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:postreal/data/models/post.dart';
-import 'package:postreal/presentation/shared_layout/profile_screen.dart';
 import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/providers/user_provider.dart';
+import 'package:postreal/utils/take_to_profile.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/user.dart';
@@ -66,7 +67,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             isGreaterThanOrEqualTo: _searchField.text)
                         .get(),
                     builder: (context, usersSnapshot) {
-                      if (!usersSnapshot.hasData) {
+                      if (!usersSnapshot.hasData ||
+                          usersSnapshot.connectionState ==
+                              ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return Column(
@@ -84,26 +87,18 @@ class _SearchScreenState extends State<SearchScreen> {
                             child: ListView.builder(
                                 itemCount: usersSnapshot.data!.docs.length,
                                 itemBuilder: (context, index) {
+                                  User thisUser = User.fromSnap(
+                                      usersSnapshot.data!.docs[index]);
                                   return InkWell(
                                     onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => ProfileScreen(
-                                              uIdOfProfileOwner: usersSnapshot
-                                                  .data!.docs[index]['uid']),
-                                        ),
-                                      );
+                                      navigateToProfile(thisUser.uid);
                                     },
                                     child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                            usersSnapshot.data!.docs[index]
-                                                ['profilePicUrl']),
-                                      ),
-                                      title: Text(usersSnapshot
-                                          .data!.docs[index]['username']),
-                                      // subtitle: Text(
-                                      //     "${usersSnapshot.data!.docs[index]['bio']}"),
+                                      leading: UserDP(
+                                          dpUrl: thisUser.profilePicUrl,
+                                          isVerified: thisUser.isVerified),
+                                      title: Text(thisUser.username),
+                                      subtitle: Text(thisUser.bio),
                                     ),
                                   );
                                 }),

@@ -5,6 +5,7 @@ import 'package:postreal/data/models/notification.dart';
 import 'package:postreal/main.dart';
 import 'package:postreal/presentation/widgets/custom_text.dart';
 import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/utils/date_to_string.dart';
 import 'package:postreal/utils/notification_msg.dart';
 import 'package:postreal/utils/take_to_profile.dart';
@@ -31,8 +32,9 @@ class NotificationTile extends StatelessWidget {
       child: ListTile(
         leading: GestureDetector(
           onTap: () => navigateToProfile(notification.senderId),
-          child: CircleAvatar(
-              backgroundImage: NetworkImage(notification.senderProfilePic)),
+          child: UserDP(
+              dpUrl: notification.senderProfilePic,
+              isVerified: notification.isVerified),
         ),
         title: CustomText(
           text: notificationMsg(notification),

@@ -10,6 +10,7 @@ import 'package:postreal/presentation/shared_layout/profile_screen.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/comments_buttom_sheet.dart';
 import 'package:postreal/presentation/widgets/like_animation.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/utils/date_to_string.dart';
 import 'package:postreal/utils/take_to_profile.dart';
 import 'package:provider/provider.dart';
@@ -51,11 +52,9 @@ class _PostCardState extends State<PostCard> {
               },
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundImage:
-                        NetworkImage(widget.postData.profilePicUrl),
-                  ),
+                  UserDP(
+                      dpUrl: widget.postData.profilePicUrl,
+                      isVerified: widget.postData.isVerified),
                   const SizedBox(
                     width: 10,
                   ),

@@ -5,10 +5,10 @@ class UserNotification {
   final String senderId;
   final String senderUsername;
   final String senderProfilePic;
+  final bool isVerified;
   final String notificationType;
   final DateTime timeStamp;
   final bool isRead;
-  // final String msg;
   final String? postId;
   final String? postPicUrl;
 
@@ -17,10 +17,10 @@ class UserNotification {
       required this.senderId,
       required this.senderUsername,
       required this.senderProfilePic,
+      required this.isVerified,
       required this.notificationType,
       required this.timeStamp,
       this.isRead = false,
-      // required this.msg,
       this.postId,
       this.postPicUrl});
 
@@ -29,10 +29,10 @@ class UserNotification {
         'senderId': senderId,
         'senderUsername': senderUsername,
         'senderProfilePic': senderProfilePic,
+        'isVerified': isVerified,
         'notificationType': notificationType,
         'timeStamp': timeStamp,
         'isRead': isRead,
-        // 'msg': msg,
         'postId': postId,
         'postPicUrl': postPicUrl
       };
@@ -44,10 +44,10 @@ class UserNotification {
         senderId: snap['senderId'],
         senderUsername: snap['senderUsername'],
         senderProfilePic: snap['senderProfilePic'],
+        isVerified: snap['isVerified'] ?? false,
         notificationType: snap['notificationType'],
         timeStamp: snap['timeStamp'].toDate(),
         isRead: snap['isRead'],
-        // msg: snap['msg'],
         postId: snap['postId'],
         postPicUrl: snap['postPicUrl']);
   }

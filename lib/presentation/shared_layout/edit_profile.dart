@@ -56,7 +56,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       decoration: InputDecoration(
                           labelText: "Email",
                           suffixIcon: IconButton(
-                              onPressed: () {}, icon: const Icon(Icons.edit)))),
+                              onPressed: () {},
+                              icon: const Icon(Icons.lock_person_outlined)))),
                   TextFormField(
                     controller: _usernameController,
                     keyboardType: TextInputType.text,

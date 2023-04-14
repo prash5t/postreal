@@ -12,6 +12,7 @@ import 'package:postreal/presentation/shared_layout/edit_profile.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/stalk_dp_widget.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 
@@ -143,11 +144,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       );
                                     });
                               },
-                              child: CircleAvatar(
+                              child: UserDP(
+                                dpUrl: dataOfProfileOwner['profilePicUrl'],
+                                isVerified: dataOfProfileOwner['isVerified'],
                                 radius: 40,
-                                backgroundColor: Colors.grey,
-                                backgroundImage: NetworkImage(
-                                    dataOfProfileOwner['profilePicUrl']),
                               ),
                             ),
                             Expanded(

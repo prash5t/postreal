@@ -7,6 +7,7 @@ class Post {
   final String username;
   final DateTime datePublished;
   final String profilePicUrl;
+  final bool isVerified;
   final String postPicUrl;
   final String postId;
 
@@ -17,6 +18,7 @@ class Post {
       required this.username,
       required this.datePublished,
       required this.profilePicUrl,
+      required this.isVerified,
       required this.postPicUrl,
       required this.postId});
 
@@ -27,6 +29,7 @@ class Post {
         "username": username,
         "datePublished": datePublished,
         "profilePicUrl": profilePicUrl,
+        "isVerified": isVerified,
         "postPicUrl": postPicUrl,
         "postId": postId
       };
@@ -40,6 +43,7 @@ class Post {
         username: snap['username'],
         datePublished: snap['datePublished'].toDate(),
         profilePicUrl: snap['profilePicUrl'],
+        isVerified: snap['isVerified'] ?? false,
         postPicUrl: snap['postPicUrl'],
         postId: snap['postId']);
   }

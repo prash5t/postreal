@@ -8,15 +8,16 @@ class User {
   final String profilePicUrl;
   final List followers;
   final List following;
-  const User({
-    required this.email,
-    required this.username,
-    required this.bio,
-    required this.uid,
-    required this.profilePicUrl,
-    required this.followers,
-    required this.following,
-  });
+  final bool isVerified;
+  const User(
+      {required this.email,
+      required this.username,
+      required this.bio,
+      required this.uid,
+      required this.profilePicUrl,
+      required this.followers,
+      required this.following,
+      this.isVerified = false});
 
   Map<String, dynamic> toJson() => {
         "username": username,
@@ -25,7 +26,8 @@ class User {
         "bio": bio,
         "profilePicUrl": profilePicUrl,
         "followers": followers,
-        "following": following
+        "following": following,
+        "isVerified": isVerified
       };
 
   static User fromSnap(DocumentSnapshot snapshot) {
@@ -37,6 +39,7 @@ class User {
         uid: snap['uid'],
         profilePicUrl: snap['profilePicUrl'],
         followers: snap['followers'],
-        following: snap['following']);
+        following: snap['following'],
+        isVerified: snap['isVerified']);
   }
 }

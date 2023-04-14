@@ -120,6 +120,7 @@ class FirestoreMethods {
         username: user.username.trim(),
         datePublished: DateTime.now(),
         profilePicUrl: user.profilePicUrl,
+        isVerified: user.isVerified,
         postPicUrl: pictureUrl,
         postId: const Uuid().v1(),
       );
@@ -176,6 +177,7 @@ class FirestoreMethods {
               senderId: likerId,
               senderUsername: liker.username,
               senderProfilePic: liker.profilePicUrl,
+              isVerified: liker.isVerified,
               notificationType: "like",
               timeStamp: DateTime.now(),
               postId: postId,
@@ -215,6 +217,7 @@ class FirestoreMethods {
       senderId: stalkerId,
       senderUsername: follower.username,
       senderProfilePic: follower.profilePicUrl,
+      isVerified: follower.isVerified,
       notificationType: "follow",
       timeStamp: DateTime.now(),
     );
@@ -249,12 +252,14 @@ class FirestoreMethods {
       required String posterId,
       required String username,
       required String profilePicUrl,
+      required bool isVerified,
       required String postPicUrl}) async {
     try {
       Comment comment = Comment(
           text: text.trim(),
           commentId: const Uuid().v1(),
           commentatorProfilePicUrl: profilePicUrl,
+          isVerified: isVerified,
           commentatorUsername: username,
           commentatorId: commentatorId,
           dateCommented: DateTime.now());
@@ -272,6 +277,7 @@ class FirestoreMethods {
             senderId: commentatorId,
             senderUsername: username,
             senderProfilePic: profilePicUrl,
+            isVerified: isVerified,
             notificationType: "comment",
             timeStamp: DateTime.now(),
             postId: postId,

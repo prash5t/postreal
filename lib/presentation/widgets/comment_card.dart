@@ -4,6 +4,7 @@ import 'package:postreal/constants/presentation_constants.dart';
 import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/comment.dart';
 import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/utils/date_to_string.dart';
 import 'package:postreal/utils/take_to_profile.dart';
 
@@ -42,10 +43,9 @@ class _CommentCardState extends State<CommentCard> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              backgroundImage:
-                  NetworkImage(widget.commentData.commentatorProfilePicUrl),
-            ),
+            UserDP(
+                dpUrl: widget.commentData.commentatorProfilePicUrl,
+                isVerified: widget.commentData.isVerified),
             const SizedBox(
               width: 10,
             ),

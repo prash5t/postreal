@@ -115,6 +115,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                                                   username: user.username,
                                                   profilePicUrl:
                                                       user.profilePicUrl,
+                                                  isVerified: user.isVerified,
                                                   postPicUrl: widget
                                                       .postData.postPicUrl);
 
