@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:postreal/business_logic/addphoto_bloc/addphoto_bloc.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/presentation/shared_layout/addphoto_screen.dart';
 import 'package:postreal/presentation/shared_layout/home_screen.dart';

@@ -39,7 +39,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void selectSelfie() async {
     File? img = await pickImage(defaultTargetPlatform == TargetPlatform.iOS
-        ? ImageSource.gallery
+        ? kDebugMode
+            ? ImageSource.gallery
+            : ImageSource.camera
         : ImageSource.camera);
     setState(() {
       _userSelfie = img;

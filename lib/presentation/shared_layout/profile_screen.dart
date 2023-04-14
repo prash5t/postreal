@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/constants/presentation_constants.dart';
-import 'package:postreal/constants/routes.dart';
 import 'package:postreal/data/firestore_methods.dart';
 import 'package:postreal/data/models/post.dart';
 import 'package:postreal/data/models/user.dart';
@@ -109,8 +108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (shouldLogout!) {
                             BlocProvider.of<AuthBloc>(navKey.currentContext!)
                                 .add(LogoutClickedEvent());
-                            Navigator.pushReplacementNamed(
-                                navKey.currentContext!, AppRoutes.loginscreen);
                             Fluttertoast.showToast(
                                 msg: "Logged out...",
                                 gravity: ToastGravity.CENTER);
