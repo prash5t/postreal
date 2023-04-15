@@ -148,6 +148,12 @@ def follow_unfollow_user(request, userId):
             )
 
         following_user_id = form.cleaned_data['userId']
+        if following_user_id == authenticated_user.id:
+            return generic_response(
+                success=False,
+                message="User cannot follow themselves!",
+                status=status.HTTP_400_BAD_REQUEST
+            )
             
         connection_obj = Connection.objects.create(user_id=authenticated_user, following_user_id_id=following_user_id)
         info_logger.info(f'User: {authenticated_user.username} started following user: {connection_obj.following_user_id.username}')
