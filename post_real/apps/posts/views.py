@@ -285,3 +285,31 @@ def comment_info(request, postId):
     
     except Exception as err:
         return log_exception(err)
+
+
+@api_view(["GET"])
+def feed(request):
+    """
+    Timeline Feed.
+    List all the posts of following user.
+    """
+    try:
+        authenticated_user = request.user
+        following_user_ids = list(authenticated_user.connection_user.values_list("following_user_id", flat=True))
+        following_user_ids.append(authenticated_user.id)
+
+        qs = Post.objects.filter(userId__in=following_user_ids).select_related('userId').prefetch_related('like_post', 'comment_post').order_by('-created_at') 
+        liked_post_of_user = get_liked_post_of_user(authenticated_user)
+
+        serializer = PostSerializer(qs, many=True, context=liked_post_of_user)
+
+        info_logger.info(f'Timeline feed requested by user: {authenticated_user.username}')
+        return generic_response(
+            success=True,
+            message='Timeline Feed',
+            data=serializer.data,
+            status=status.HTTP_200_OK
+        )
+    
+    except Exception as err:
+        return log_exception(err)
