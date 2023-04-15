@@ -45,10 +45,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
-    userId = serializers.ReadOnlyField(source="user_id_id")
-    username = serializers.ReadOnlyField(source="user_id.username")
-    profilePicUrl = serializers.ImageField(source="user_id.profilePicUrl", read_only=True)
-    
     class Meta:
         model = Connection
         fields = [
@@ -57,3 +53,17 @@ class ConnectionSerializer(serializers.ModelSerializer):
             "username",
             "profilePicUrl"
         ]
+        abstract = True
+
+
+class FollowerSerializer(ConnectionSerializer):
+    userId = serializers.ReadOnlyField(source="user_id_id")
+    username = serializers.ReadOnlyField(source="user_id.username")
+    profilePicUrl = serializers.ImageField(source="user_id.profilePicUrl", read_only=True)
+    
+
+class FollowingSerializer(ConnectionSerializer):
+    userId = serializers.ReadOnlyField(source="following_user_id_id")
+    username = serializers.ReadOnlyField(source="following_user_id.username")
+    profilePicUrl = serializers.ImageField(source="following_user_id.profilePicUrl", read_only=True)
+    
