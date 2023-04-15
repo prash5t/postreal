@@ -4,7 +4,9 @@ from .models import  User, Connection
 
 class UserSerializer(serializers.ModelSerializer):
     followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
     followers_info_url = serializers.SerializerMethodField()
+    following_info_url = serializers.SerializerMethodField()
 
     class Meta:
         model=User
@@ -17,7 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_no',
             'is_verified',
             'followers',
+            'following',
             'followers_info_url',
+            'following_info_url',
         ]
         extra_kwargs = {'password': {'write_only': True}}
         
@@ -35,13 +39,28 @@ class UserSerializer(serializers.ModelSerializer):
         if not self.context: return 0
         return user.connection_following_user.count()
     
+    def get_following(self, user):
+        """
+        Get total no. of following.
+        """
+        if not self.context: return 0
+        return user.connection_user.count()
+    
     def get_followers_info_url(self, user):
         """
         Get followers info.
         """
         if not self.context: return None
-        comment_info_url = "/apis/v1/users/follower-info/%s/" % user.id
-        return comment_info_url
+        follower_info_url = "/apis/v1/users/follower-info/%s/" % user.id
+        return follower_info_url
+
+    def get_following_info_url(self, user):
+        """
+        Get following info.
+        """
+        if not self.context: return None
+        following_info_url = "/apis/v1/users/following-info/%s/" % user.id
+        return following_info_url
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
