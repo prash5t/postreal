@@ -29,11 +29,15 @@ class UserRegisterView(generics.CreateAPIView):
             if serializer.is_valid():
                 serializer.save()
 
-                info_logger.info(f'New user registered: {serializer.data.get("username")}')
+                serialized_data = serializer.data
+                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                for key in keys_to_remove: serialized_data.pop(key)
+
+                info_logger.info(f'New user registered: {serialized_data.get("username")}')
                 return generic_response(
                     success=True,
                     message='User Registered Successfully',
-                    data=serializer.data,
+                    data=serialized_data,
                     status=status.HTTP_200_OK
                 )
             
@@ -90,11 +94,15 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
             if serializer.is_valid():
                 serializer.save()
 
+                serialized_data = serializer.data
+                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                for key in keys_to_remove: serialized_data.pop(key)
+
                 info_logger.info(f'User info updated for user: {authenticated_user.username}')
                 return generic_response(
                     success=True,
                     message='User Info Updated',
-                    data=serializer.data,
+                    data=serialized_data,
                     status=status.HTTP_200_OK
                 )
             
