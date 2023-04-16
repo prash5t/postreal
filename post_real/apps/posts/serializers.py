@@ -3,7 +3,8 @@ from .models import Post, Like, Comment
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source="userId.username")
+    userId = serializers.ReadOnlyField(source="userId.id")
+    username = serializers.ReadOnlyField(source="userId.username")
     profilePicUrl = serializers.ImageField(source="userId.profilePicUrl", read_only=True)
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
@@ -24,7 +25,7 @@ class PostSerializer(serializers.ModelSerializer):
             "total_comments",
             "has_liked",
             "userId",
-            "author",
+            "username",
             "profilePicUrl",
             "like_info_url", 
             "comment_info_url",
