@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 
 from .models import Connection
 from .serializers import UserSerializer, FollowerSerializer, FollowingSerializer
-from post_real.core.validation_form import FollowUnfollowForm
+from post_real.core.validation_form import UserIdValidationForm
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
@@ -140,7 +140,7 @@ def follow_unfollow_user(request, userId):
     try:
         authenticated_user = request.user
 
-        form = FollowUnfollowForm({"userId":userId})
+        form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while following user')
             return log_field_error(
@@ -148,12 +148,19 @@ def follow_unfollow_user(request, userId):
             )
 
         following_user_id = form.cleaned_data['userId']
+        if following_user_id == authenticated_user.id:
+            info_logger.info(f'User: {authenticated_user.username} tried to follow themselves.')
+            return generic_response(
+                success=False,
+                message="User cannot follow themselves!",
+                status=status.HTTP_400_BAD_REQUEST
+            )
             
-        connection_obj = Connection.objects.create(user_id=authenticated_user, following_user_id_id=following_user_id)
-        info_logger.info(f'User: {authenticated_user.username} started following user: {connection_obj.following_user_id.username}')
+        result = Connection.objects.create(user_id=authenticated_user, following_user_id_id=following_user_id)
+        info_logger.info(f'User: {authenticated_user.username} started following user: {result.following_user_id.username}')
         return generic_response(
                 success=True,
-                message='Started Following User @%s' % connection_obj.following_user_id.username,
+                message='Started Following User @%s' % result.following_user_id.username,
                 status=status.HTTP_200_OK
             )
     
@@ -185,7 +192,7 @@ def follower_info(request, userId):
     Get followers info of user.
     """
     try:
-        form = FollowUnfollowForm({"userId":userId})
+        form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {request.user.username} while requesting followers info.')
             return log_field_error(
@@ -193,9 +200,9 @@ def follower_info(request, userId):
             )
         
         userId = form.cleaned_data['userId']
-        qs = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
+        result = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
 
-        serializer = FollowerSerializer(qs, many=True)
+        serializer = FollowerSerializer(result, many=True)
         info_logger.info(f'Follower info requested by user: {request.user.username} of user: {userId}')
         return generic_response(
                     success=True,
@@ -214,7 +221,7 @@ def following_info(request, userId):
     Get following info of user.
     """
     try:
-        form = FollowUnfollowForm({"userId":userId})
+        form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {request.user.username} while requesting following info.')
             return log_field_error(
@@ -222,9 +229,9 @@ def following_info(request, userId):
             )
         
         userId = form.cleaned_data['userId']
-        qs = Connection.objects.filter(user_id=userId).select_related("following_user_id").order_by("-created_at")
+        result = Connection.objects.filter(user_id=userId).select_related("following_user_id").order_by("-created_at")
 
-        serializer = FollowingSerializer(qs, many=True)
+        serializer = FollowingSerializer(result, many=True)
         info_logger.info(f'Following users info requested by user: {request.user.username} of user: {userId}')
         return generic_response(
                     success=True,

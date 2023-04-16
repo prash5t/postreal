@@ -5,8 +5,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 
 from .models import Post, Like, Comment
+from post_real.apps.users.models import User
 from .serializers import PostSerializer, LikeSerializer, CommentSerializer
-from post_real.core.validation_form import CommentForm
+from post_real.core.validation_form import CommentValidationForm, UserIdValidationForm
 from post_real.core.query_helper import get_liked_post_of_user
 from post_real.core.authorization import check_user_access_on_post
 from post_real.core.log_and_response import info_logger, generic_response, log_exception, log_field_error, post_not_found_error
@@ -56,22 +57,40 @@ class PostViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         """
-        List all the posts of authenticated user.
+        List all the post of user.
         """
         try:
-            authenticated_user = request.user
+            user = request.user
 
-            queryset = authenticated_user.post_user.prefetch_related('like_post', 'comment_post').order_by('-created_at') 
-            liked_post_of_user = get_liked_post_of_user(authenticated_user)
+            if userId:=request.query_params.get('userId'):
+                form = UserIdValidationForm({"userId":userId})
+                if not form.is_valid():
+                    info_logger.warn(f'Field error / Bad Request from user: {user.username} while requesting post info.')
+                    return log_field_error(
+                        {"userId": ["Invalid uuid!"]}
+                    )
+                user_id = form.cleaned_data["userId"]
+                user = User.objects.get(id=user_id)
 
-            serializer = self.serializer_class(queryset, many=True, context=liked_post_of_user)
+            result = user.post_user.prefetch_related('like_post', 'comment_post').order_by('-created_at') 
+            liked_post_of_user = get_liked_post_of_user(request.user)
 
-            info_logger.info(f'Posts info requested for user: {authenticated_user.username}')
+            serializer = self.serializer_class(result, many=True, context=liked_post_of_user)
+
+            info_logger.info(f'Posts info requested of user: {user.username} by user: {request.user.username}')
             return generic_response(
                 success=True,
                 message='Posts Info',
                 data=serializer.data,
                 status=status.HTTP_200_OK
+            )
+        
+        except User.DoesNotExist:
+            info_logger.warn(f'User: {user.username} tried to list posts of non existing user')
+            return generic_response(
+                success=False,
+                message="User Doesn't Exists!",
+                status=status.HTTP_404_NOT_FOUND
             )
         
         except Exception as err:
@@ -80,7 +99,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         """
-        Retrieve specific post of authenticated user.
+        Retrieve specific post.
         """
         try:
             authenticated_user = request.user
@@ -216,8 +235,8 @@ def like_info(request, postId):
     Get total likes and users who liked the post.
     """
     try:
-        qs = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
-        serializer = LikeSerializer(qs, many=True)
+        result = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        serializer = LikeSerializer(result, many=True)
         info_logger.info(f'Like info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
@@ -238,7 +257,7 @@ def comment_on_post(request):
     try:
         authenticated_user = request.user
 
-        form = CommentForm(request.data)
+        form = CommentValidationForm(request.data)
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while commenting on post')
             return log_field_error(
@@ -251,11 +270,13 @@ def comment_on_post(request):
         post_id = form.cleaned_data["postId"]
         comment = form.cleaned_data["comment"]
 
-        Comment.objects.create(comment=comment, postId_id=post_id, commented_by=authenticated_user)
+        result = Comment.objects.create(comment=comment, postId_id=post_id, commented_by=authenticated_user)
+        serializer = CommentSerializer(result)
         info_logger.info(f'User: {authenticated_user.username} commented on post: {post_id}')
         return generic_response(
                 success=True,
                 message='Comment Posted',
+                data = serializer.data,
                 status=status.HTTP_201_CREATED
             )
     
@@ -273,8 +294,8 @@ def comment_info(request, postId):
     Get total likes and users who liked the post.
     """
     try:
-        qs = Comment.objects.filter(postId_id=postId).select_related('commented_by').order_by("-created_at")
-        serializer = CommentSerializer(qs, many=True)
+        result = Comment.objects.filter(postId_id=postId).select_related('commented_by').order_by("-created_at")
+        serializer = CommentSerializer(result, many=True)
         info_logger.info(f'Comment info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
@@ -298,10 +319,10 @@ def feed(request):
         following_user_ids = list(authenticated_user.connection_user.values_list("following_user_id", flat=True))
         following_user_ids.append(authenticated_user.id)
 
-        qs = Post.objects.filter(userId__in=following_user_ids).select_related('userId').prefetch_related('like_post', 'comment_post').order_by('-created_at') 
+        result = Post.objects.filter(userId__in=following_user_ids).select_related('userId').prefetch_related('like_post', 'comment_post').order_by('-created_at') 
         liked_post_of_user = get_liked_post_of_user(authenticated_user)
 
-        serializer = PostSerializer(qs, many=True, context=liked_post_of_user)
+        serializer = PostSerializer(result, many=True, context=liked_post_of_user)
 
         info_logger.info(f'Timeline feed requested by user: {authenticated_user.username}')
         return generic_response(
