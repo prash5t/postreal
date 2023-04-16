@@ -14,12 +14,12 @@ class FeedScreen extends StatelessWidget {
           backgroundColor: Colors.transparent,
           centerTitle: false,
           title: const Text("PostReal"),
-          actions: [
-            IconButton(
-                onPressed: () {},
-                iconSize: 26,
-                icon: const Icon(Icons.message_outlined))
-          ],
+          // actions: [
+          //   IconButton(
+          //       onPressed: () {},
+          //       iconSize: 26,
+          //       icon: const Icon(Icons.message_outlined))
+          // ],
         ),
         body: SafeArea(
           child: StreamBuilder(

@@ -7,6 +7,7 @@ import 'package:postreal/data/models/comment.dart';
 import 'package:postreal/data/models/post.dart';
 import 'package:postreal/data/models/user.dart';
 import 'package:postreal/presentation/widgets/comment_card.dart';
+import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:provider/provider.dart';
 
 class CommentsScreen extends StatefulWidget {
@@ -80,10 +81,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             padding: const EdgeInsets.only(left: 16, right: 8.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(user.profilePicUrl),
-                ),
+                UserDP(dpUrl: user.profilePicUrl, isVerified: user.isVerified),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 15, right: 8.0),

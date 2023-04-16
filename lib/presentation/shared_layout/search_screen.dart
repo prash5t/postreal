@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:postreal/data/models/post.dart';
 import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/user_dp.dart';
+import 'package:postreal/presentation/widgets/username_widget.dart';
 import 'package:postreal/providers/user_provider.dart';
 import 'package:postreal/utils/take_to_profile.dart';
 import 'package:provider/provider.dart';
@@ -97,7 +98,9 @@ class _SearchScreenState extends State<SearchScreen> {
                                       leading: UserDP(
                                           dpUrl: thisUser.profilePicUrl,
                                           isVerified: thisUser.isVerified),
-                                      title: Text(thisUser.username),
+                                      title: UsernameWidget(
+                                          isVerified: thisUser.isVerified,
+                                          username: thisUser.username),
                                       subtitle: Text(thisUser.bio),
                                     ),
                                   );

@@ -11,6 +11,7 @@ import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/comments_buttom_sheet.dart';
 import 'package:postreal/presentation/widgets/like_animation.dart';
 import 'package:postreal/presentation/widgets/user_dp.dart';
+import 'package:postreal/presentation/widgets/username_widget.dart';
 import 'package:postreal/utils/date_to_string.dart';
 import 'package:postreal/utils/take_to_profile.dart';
 import 'package:provider/provider.dart';
@@ -59,16 +60,9 @@ class _PostCardState extends State<PostCard> {
                     width: 10,
                   ),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.postData.username,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
+                      child: UsernameWidget(
+                          isVerified: widget.postData.isVerified,
+                          username: widget.postData.username)),
                   Text(
                     stringDate,
                     style: const TextStyle(
@@ -106,12 +100,30 @@ class _PostCardState extends State<PostCard> {
                   width: double.infinity,
                   child: PinchZoom(
                     resetDuration: const Duration(milliseconds: 100),
-                    child: Image.network(
-                      widget.postData.postPicUrl,
+                    child: FadeInImage.assetNetwork(
+                      placeholder: 'lib/presentation/assets/loading.gif',
+                      image: widget.postData.postPicUrl,
                       fit: BoxFit.cover,
+                      imageErrorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'lib/presentation/assets/limit.jpg',
+                          fit: BoxFit.cover,
+                        );
+                      },
                     ),
                   ),
                 ),
+                // SizedBox(
+                //   height: MediaQuery.of(context).size.height * 0.6,
+                //   width: double.infinity,
+                //   child: PinchZoom(
+                //     resetDuration: const Duration(milliseconds: 100),
+                //     child: Image.network(
+                //       widget.postData.postPicUrl,
+                //       fit: BoxFit.cover,
+                //     ),
+                //   ),
+                // ),
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
                   opacity: isLikeAnimating ? 1 : 0,
@@ -209,19 +221,16 @@ class _PostCardState extends State<PostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => ProfileScreen(
-                              uIdOfProfileOwner: widget.postData.uid)),
-                    );
-                  },
-                  child: Text(
-                    widget.postData.username,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => ProfileScreen(
+                                uIdOfProfileOwner: widget.postData.uid)),
+                      );
+                    },
+                    child: UsernameWidget(
+                        isVerified: widget.postData.isVerified,
+                        username: widget.postData.username)),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(

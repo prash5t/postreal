@@ -13,6 +13,7 @@ import 'package:postreal/presentation/widgets/bool_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/post_bottom_sheet.dart';
 import 'package:postreal/presentation/widgets/stalk_dp_widget.dart';
 import 'package:postreal/presentation/widgets/user_dp.dart';
+import 'package:postreal/presentation/widgets/username_widget.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 
@@ -95,7 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             elevation: 0.1,
             backgroundColor: Colors.transparent,
-            title: Text(dataOfProfileOwner['username']),
+            title: UsernameWidget(
+                isVerified: dataOfProfileOwner['isVerified'],
+                username: dataOfProfileOwner['username']),
             centerTitle: false,
             actions: [
               isProfileOwner

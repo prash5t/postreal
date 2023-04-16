@@ -12,19 +12,24 @@ class UserDP extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Badge(
-      backgroundColor: Colors.red,
-      alignment: AlignmentDirectional.centerEnd,
-      // label: const Text("Rich"),
-      label: const Icon(
-        Icons.check,
-        size: 12,
-      ),
-      isLabelVisible: isVerified,
-      child: CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.grey,
-        backgroundImage: NetworkImage(dpUrl),
+    return ClipOval(
+      child: Container(
+        width: radius * 2,
+        height: radius * 2,
+        decoration: !isVerified
+            ? null
+            : BoxDecoration(
+                border: Border.all(
+                  color: Colors.tealAccent,
+                  width: 3.0,
+                ),
+                shape: BoxShape.circle,
+              ),
+        child: CircleAvatar(
+          radius: radius,
+          backgroundColor: Colors.grey,
+          backgroundImage: NetworkImage(dpUrl),
+        ),
       ),
     );
   }
