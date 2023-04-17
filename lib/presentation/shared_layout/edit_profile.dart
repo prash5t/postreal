@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:postreal/business_logic/editprofile_bloc/editprofile_bloc.dart';
-import 'package:postreal/main.dart';
 import 'package:postreal/presentation/widgets/super_user_widget.dart';
 import 'package:postreal/utils/validator.dart';
 
@@ -37,7 +36,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           listener: (context, editProfileState) {
         if (editProfileState is ProfileUpdatedState) {
           Fluttertoast.showToast(msg: "Profile updated");
-          Navigator.of(navKey.currentContext!).pop();
+          Navigator.of(context).pop();
         } else if (editProfileState is UpdateErrorState) {
           Fluttertoast.showToast(msg: editProfileState.message!);
         }
@@ -45,6 +44,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         return Scaffold(
             bottomNavigationBar: SafeArea(
               child: SuperUserWidget(
+                  dpUrl: widget.dataofProfileOwner['profilePicUrl'],
+                  username: widget.dataofProfileOwner['username'],
                   isVerified: widget.dataofProfileOwner['isVerified']),
             ),
             body: SafeArea(

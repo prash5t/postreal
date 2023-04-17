@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
+import 'package:postreal/my_keys.dart';
 import 'package:postreal/presentation/shared_layout/addphoto_screen.dart';
 import 'package:postreal/presentation/shared_layout/home_screen.dart';
 import 'package:postreal/presentation/shared_layout/login_screen.dart';
@@ -40,22 +42,35 @@ class MyApp extends StatelessWidget {
           minTextAdapt: true,
           splitScreenMode: true,
           builder: (context, child) {
-            return MaterialApp(
-                debugShowCheckedModeBanner: false,
+            return KhaltiScope(
+                enabledDebugging: true,
+                publicKey: khaltiPublicKey,
                 navigatorKey: navKey,
-                title: 'PostReal',
-                themeMode: ThemeMode.system,
-                theme: lightTheme,
-                darkTheme: darkTheme,
-                routes: {
-                  AppRoutes.loginscreen: (context) => const LoginScreen(),
-                  AppRoutes.registerscreen: (context) => const RegisterScreen(),
-                  AppRoutes.addPostScreen: (context) => AddPostScreen(
-                        onImageNotReceived: () => Navigator.pop(context),
-                      ),
-                  AppRoutes.homescreen: (context) => const HomeScreen(),
-                },
-                home: const AppEntry());
+                builder: (context, navKey) {
+                  return MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      navigatorKey: navKey,
+                      supportedLocales: const [
+                        Locale('en', 'US'),
+                        Locale('ne', 'NP'),
+                      ],
+                      localizationsDelegates: const [
+                        KhaltiLocalizations.delegate
+                      ],
+                      title: 'PostReal',
+                      themeMode: ThemeMode.system,
+                      theme: lightTheme,
+                      darkTheme: darkTheme,
+                      routes: {
+                        AppRoutes.loginscreen: (context) => const LoginScreen(),
+                        AppRoutes.registerscreen: (context) =>
+                            const RegisterScreen(),
+                        AppRoutes.addPostScreen: (context) =>
+                            const AddPostScreen(),
+                        AppRoutes.homescreen: (context) => const HomeScreen(),
+                      },
+                      home: const AppEntry());
+                });
           }),
     );
   }

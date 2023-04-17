@@ -9,8 +9,7 @@ import 'package:postreal/utils/validator.dart';
 import 'package:provider/provider.dart';
 
 class AddPostScreen extends StatefulWidget {
-  final VoidCallback onImageNotReceived;
-  const AddPostScreen({super.key, required this.onImageNotReceived});
+  const AddPostScreen({super.key});
 
   @override
   State<AddPostScreen> createState() => _AddPostScreenState();

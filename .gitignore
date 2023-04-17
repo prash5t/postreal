@@ -47,6 +47,7 @@ app.*.map.json
 
 # creds and platform specific directories
 /lib/firebase_options.dart
+/lib/my_keys.dart
 /android/
 /ios/
 /windows/
