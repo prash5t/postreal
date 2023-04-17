@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 import 'package:postreal/data/auth_methods.dart';
 import 'package:postreal/data/models/comment.dart';
 import 'package:postreal/data/models/notification.dart';
@@ -11,6 +12,21 @@ import 'package:uuid/uuid.dart';
 class FirestoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthMethods _authMethods = AuthMethods();
+
+  //function to save success payment record for Super User
+  Future<void> savePayment(PaymentSuccessModel successModel) async {
+    await _firestore
+        .collection('users')
+        .doc(_authMethods.auth.currentUser!.uid)
+        .update({'isVerified': true});
+    await _firestore
+        .collection('khalti')
+        .doc(_authMethods.auth.currentUser!.uid)
+        .set({
+      'uid': _authMethods.auth.currentUser!.uid,
+      'khaltiInfo': successModel.toString()
+    });
+  }
 
   //function to get data of a particular post
   Future<Post> getPostData(String postId) async {
