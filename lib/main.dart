@@ -64,9 +64,7 @@ class MyApp extends StatelessWidget {
                             KhaltiLocalizations.delegate
                           ],
                           title: 'PostReal',
-                          // themeMode: ThemeMode.system,
                           theme: themeToShow,
-                          // darkTheme: darkTheme,
                           routes: {
                             AppRoutes.loginscreen: (context) =>
                                 const LoginScreen(),
