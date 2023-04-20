@@ -23,5 +23,5 @@ Social media app that only allows you to post photos from your camera, not from 
 - Publish to Google Play Store
 - Your PR's or any form of contribution will be acknowledged.
 
-Flutter branch: hi@ghimireprashant.com.np
-Django branch: arunmahara124@gmail.com
+Flutter branch: hi@ghimireprashant.com.np <br>
+Django branch: hello@maharaarun.com.np
