@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:postreal/business_logic/switch_theme_cubit/switch_theme_cubit.dart';
 import 'package:postreal/data/models/post.dart';
+import 'package:postreal/presentation/themes/dark_theme.dart';
 import 'package:postreal/presentation/widgets/post_card.dart';
 
 class FeedScreen extends StatelessWidget {
@@ -14,12 +18,18 @@ class FeedScreen extends StatelessWidget {
           backgroundColor: Colors.transparent,
           centerTitle: false,
           title: const Text("PostReal"),
-          // actions: [
-          //   IconButton(
-          //       onPressed: () {},
-          //       iconSize: 26,
-          //       icon: const Icon(Icons.message_outlined))
-          // ],
+          actions: [
+            BlocBuilder<SwitchThemeCubit, ThemeData>(
+                builder: (context, currentTheme) {
+              return CupertinoSwitch(
+                  thumbColor: Theme.of(context).colorScheme.primary,
+                  activeColor: Theme.of(context).colorScheme.secondary,
+                  value: currentTheme == darkTheme,
+                  onChanged: (bool val) {
+                    BlocProvider.of<SwitchThemeCubit>(context).switchTheme();
+                  });
+            }),
+          ],
         ),
         body: SafeArea(
           child: StreamBuilder(

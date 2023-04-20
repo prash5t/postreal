@@ -20,7 +20,7 @@ class UserDP extends StatelessWidget {
             ? null
             : BoxDecoration(
                 border: Border.all(
-                  color: Colors.tealAccent,
+                  color: Theme.of(context).colorScheme.primary,
                   width: 3.0,
                 ),
                 shape: BoxShape.circle,

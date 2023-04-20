@@ -47,6 +47,7 @@ dependencies:
   khalti_flutter: ^2.2.1
   pinch_zoom: null
   provider: null
+  shared_preferences: ^2.1.0
   shimmer: ^2.0.0
   uuid: null
 

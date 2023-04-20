@@ -18,11 +18,11 @@ class UsernameWidget extends StatelessWidget {
         const SizedBox(width: 1),
         !isVerified
             ? const SizedBox()
-            : const Badge(
-                backgroundColor: Colors.tealAccent,
+            : Badge(
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 label: Icon(
                   Icons.check,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.background,
                   size: 8,
                 ),
               )
