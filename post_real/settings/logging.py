@@ -1,3 +1,6 @@
+from .base import PAPERTRAIL_HOST, PAPERTRAIL_PORT
+
+
 LOGGING = {
     # Define the logging version
     'version': 1,
@@ -48,25 +51,31 @@ LOGGING = {
             'formatter': 'verbose',
             'encoding': 'utf-8'
         },
+        'PapertrailLog': {
+            'level': 'INFO',
+            'class': 'logging.handlers.SysLogHandler',                                                    
+            'formatter': 'verbose',
+            'address': (PAPERTRAIL_HOST, PAPERTRAIL_PORT)                                                 
+        },
     },
 
    # Define the loggers
     'loggers': {
         'django.server': {
-            'handlers': ['django', 'console'],
+            'handlers': ['django', 'console', 'PapertrailLog'],
             'level': 'INFO',
         },
         'django.request': {
-            'handlers': ['django', 'console'],
+            'handlers': ['django', 'console', 'PapertrailLog'],
             'level': 'INFO',
         },
         'postreal-info': {
-            'handlers': ['info', 'console'],
+            'handlers': ['info', 'console', 'PapertrailLog'],
             'level': 'INFO',
             'propagate': True,
         },
         'postreal-error': {
-            'handlers': ['error', 'console'],
+            'handlers': ['error', 'console', 'PapertrailLog'],
             'level': 'ERROR',
             'propagate': True,
         },

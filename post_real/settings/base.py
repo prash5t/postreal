@@ -76,6 +76,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
+# media storage configuration
 if DEBUG:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -91,3 +92,8 @@ else:
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
     AWS_S3_VERIFY = True
+
+
+# papertrail logs
+PAPERTRAIL_HOST = os.environ.get("PAPERTRAIL_HOST")
+PAPERTRAIL_PORT = int(os.environ.get("PAPERTRAIL_PORT"))
