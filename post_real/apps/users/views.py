@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 
 
 from .models import Connection, User
-from .serializers import UserSerializer, FollowerSerializer, FollowingSerializer
+from .serializers import UserSerializer, UserListSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.validation_form import UserIdValidationForm
 from post_real.core.query_helper import get_following_user
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
@@ -45,6 +45,39 @@ class UserRegisterView(generics.CreateAPIView):
             info_logger.warn(f'Field error / Bad request while registering new user')
             return log_field_error(serializer.errors)
 
+        except Exception as err:
+            return log_exception(err)
+
+
+class UserListView(generics.ListAPIView):
+    """
+    View to search user.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer
+    search_fields = ['username']
+    filterset_fields = {'username': ['in'], 'email':['in']} 
+
+    def list(self, request, *args, **kwargs):
+        """
+        Search user.
+        """
+        try:
+            filtered_queryset= []
+            if any(value.strip() for value in request.query_params.values()):
+                queryset = self.get_queryset()
+                filtered_queryset = self.filter_queryset(queryset)
+
+            serializer = self.serializer_class(filtered_queryset, many=True)
+
+            info_logger.info(f'User: {request.user.username} searched users')
+            return generic_response(
+                success=True,
+                message='User Info',
+                data=serializer.data,
+                status=status.HTTP_200_OK
+            )
+        
         except Exception as err:
             return log_exception(err)
 
