@@ -5,23 +5,25 @@ from .models import  User, Connection
 class UserSerializer(serializers.ModelSerializer):
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
-    followers_info_url = serializers.SerializerMethodField()
-    following_info_url = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
 
     class Meta:
         model=User
         fields = [
+            "id",
             'username',
             'password',
             'email',
             'bio',
             'profilePicUrl',
             'phone_no',
-            'is_verified',
             'followers',
             'following',
-            'followers_info_url',
-            'following_info_url',
+            'is_verified',
+            'is_following',
+            'urls'
+
         ]
         extra_kwargs = {'password': {'write_only': True}}
         
@@ -46,21 +48,28 @@ class UserSerializer(serializers.ModelSerializer):
         if not self.context: return 0
         return user.connection_user.count()
     
-    def get_followers_info_url(self, user):
+    def get_is_following(self, user):
         """
-        Get followers info.
+        Check if current user has liked the post or not.
+        """
+        if not self.context: return False
+        following_users = self.context.get("following_users")
+        return True if user.id in following_users else False
+    
+    def get_urls(self, user):
+        """
+        Get useful urls.
         """
         if not self.context: return None
         follower_info_url = "/apis/v1/users/follower-info/%s/" % user.id
-        return follower_info_url
-
-    def get_following_info_url(self, user):
-        """
-        Get following info.
-        """
-        if not self.context: return None
         following_info_url = "/apis/v1/users/following-info/%s/" % user.id
-        return following_info_url
+        post_info_url = "/apis/v1/posts/operation/?userId=%s" % user.id
+        urls = {
+            "follower_info_url": follower_info_url,
+            "following_info_url": following_info_url,
+            "post_info_url": post_info_url,
+        }
+        return urls
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
@@ -70,7 +79,10 @@ class ConnectionSerializer(serializers.ModelSerializer):
             "id",
             "userId",
             "username",
-            "profilePicUrl"
+            "is_verified",
+            "profilePicUrl",
+            "is_following",
+            "urls",
         ]
         abstract = True
 
@@ -78,11 +90,46 @@ class ConnectionSerializer(serializers.ModelSerializer):
 class FollowerSerializer(ConnectionSerializer):
     userId = serializers.ReadOnlyField(source="user_id_id")
     username = serializers.ReadOnlyField(source="user_id.username")
+    is_verified = serializers.ReadOnlyField(source="user_id.is_verified")
     profilePicUrl = serializers.ImageField(source="user_id.profilePicUrl", read_only=True)
+    is_following = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
+
+    def get_is_following(self, connection):
+        """
+        Check if current user has liked the post or not.
+        """
+        if not self.context: return False
+        following_users = self.context.get("following_users")
+        return True if connection.user_id_id in following_users else False
+
+    def get_urls(self, connection):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % connection.user_id_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
+    
     
 
 class FollowingSerializer(ConnectionSerializer):
     userId = serializers.ReadOnlyField(source="following_user_id_id")
     username = serializers.ReadOnlyField(source="following_user_id.username")
+    is_verified = serializers.ReadOnlyField(source="following_user_id.is_verified")
     profilePicUrl = serializers.ImageField(source="following_user_id.profilePicUrl", read_only=True)
+    is_following = serializers.BooleanField(default=True, read_only=True)
+    urls = serializers.SerializerMethodField()
+
+    def get_urls(self, connection):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % connection.following_user_id_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
     

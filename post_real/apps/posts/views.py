@@ -39,7 +39,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
                 info_logger.info(f'Post created: {serializer.data.get("id")}')
                 serialized_data = serializer.data
-                keys_to_remove = ["total_likes", "total_comments", "has_liked", "like_info_url", "comment_info_url"]
+                keys_to_remove = ["total_likes", "total_comments", "has_liked", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
                 return generic_response(
                     success=True,

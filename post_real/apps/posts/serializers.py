@@ -5,12 +5,12 @@ from .models import Post, Like, Comment
 class PostSerializer(serializers.ModelSerializer):
     userId = serializers.ReadOnlyField(source="userId.id")
     username = serializers.ReadOnlyField(source="userId.username")
+    is_verified = serializers.ReadOnlyField(source="userId.is_verified")
     profilePicUrl = serializers.ImageField(source="userId.profilePicUrl", read_only=True)
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
     has_liked = serializers.SerializerMethodField()
-    like_info_url = serializers.SerializerMethodField()
-    comment_info_url = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
 
     class Meta:
         model=Post
@@ -26,9 +26,9 @@ class PostSerializer(serializers.ModelSerializer):
             "has_liked",
             "userId",
             "username",
+            "is_verified",
             "profilePicUrl",
-            "like_info_url", 
-            "comment_info_url",
+            "urls",
         ]
         extra_kwargs={"userId": {"write_only":True}}
     
@@ -53,30 +53,29 @@ class PostSerializer(serializers.ModelSerializer):
         if not self.context: return False
         liked_post_of_user = self.context.get("liked_post_of_user")
         return True if post.id in liked_post_of_user else False
-
-    def get_like_info_url(self, post):
+    
+    def get_urls(self, post):
         """
-        Get likes info of the post. 
-        User details who liked the post.
+        Get useful urls
         """
         if not self.context: return None
         like_info_url = "/apis/v1/posts/like-info/%s/" % post
-        return like_info_url
-    
-    def get_comment_info_url(self, post):
-        """
-        Get comments info of the post. 
-        Comments with User details.
-        """
-        if not self.context: return None
         comment_info_url = "/apis/v1/posts/comment-info/%s/" % post
-        return comment_info_url
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % post.userId_id
+        urls = {
+            "user_info_url": user_info_url,
+            "like_info_url": like_info_url,
+            "comment_info_url": comment_info_url,
+        }
+        return urls
 
 
 class LikeSerializer(serializers.ModelSerializer):
     userId = serializers.ReadOnlyField(source="liked_by_id")
     username = serializers.ReadOnlyField(source="liked_by.username")
+    is_verified = serializers.ReadOnlyField(source="liked_by.is_verified")
     profilePicUrl = serializers.ImageField(source="liked_by.profilePicUrl", read_only=True)
+    urls = serializers.SerializerMethodField()
 
     class Meta:
         model = Like
@@ -84,15 +83,29 @@ class LikeSerializer(serializers.ModelSerializer):
             "id",
             "userId",
             "username",
-            "profilePicUrl"
+            "is_verified",
+            "profilePicUrl",
+            "urls",
         ]
+
+    def get_urls(self, like):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % like.liked_by_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
     
 
 class CommentSerializer(serializers.ModelSerializer):
     userId = serializers.ReadOnlyField(source="commented_by_id")
     username = serializers.ReadOnlyField(source="commented_by.username")
+    is_verified = serializers.ReadOnlyField(source="liked_by.is_verified")
     profilePicUrl = serializers.ImageField(source="commented_by.profilePicUrl", read_only=True)
-    
+    urls = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
         fields = [
@@ -101,5 +114,17 @@ class CommentSerializer(serializers.ModelSerializer):
             "created_at",
             "userId",
             "username",
-            "profilePicUrl"
+            "is_verified",
+            "profilePicUrl",
+            "urls",
         ]
+    
+    def get_urls(self, comment):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % comment.commented_by_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls

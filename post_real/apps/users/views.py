@@ -5,9 +5,10 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 
 
-from .models import Connection
+from .models import Connection, User
 from .serializers import UserSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.validation_form import UserIdValidationForm
+from post_real.core.query_helper import get_following_user
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
 
@@ -30,7 +31,7 @@ class UserRegisterView(generics.CreateAPIView):
                 serializer.save()
 
                 serialized_data = serializer.data
-                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                keys_to_remove = ["followers", "following", "is_following", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
 
                 info_logger.info(f'New user registered: {serialized_data.get("username")}')
@@ -48,7 +49,7 @@ class UserRegisterView(generics.CreateAPIView):
             return log_exception(err)
 
 
-class UserListUpdateDeleteView(generics.GenericAPIView):
+class UserOperationView(generics.GenericAPIView):
     """
     View to list details of user, update and delete user.
     """
@@ -60,16 +61,35 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
         List details of authenticated user.
         """
         try:
-            authenticated_user = request.user
+            user = request.user
 
-            serializer = self.serializer_class(authenticated_user, context={"data":"data"})
+            if userId:=request.query_params.get("userId"):
+                form = UserIdValidationForm({"userId":userId})
+                if not form.is_valid():
+                    info_logger.warn(f'Field error / Bad Request from user: {user.username} while requesting user info.')
+                    return log_field_error(
+                        {"userId": ["Invalid uuid!"]}
+                    )
+                user_id = form.cleaned_data['userId']
+                user = User.objects.get(id=user_id)
 
-            info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
+            following_users = get_following_user(request.user)
+            serializer = self.serializer_class(user, context=following_users)
+
+            info_logger.info(f'User: {request.user.username} requested details of user: {user.username}')
             return generic_response(
                 success=True,
                 message='User Info',
                 data=serializer.data,
                 status=status.HTTP_200_OK
+            )
+
+        except User.DoesNotExist:
+            info_logger.warn(f'User: {user.username} tried to list details of non existing user')
+            return generic_response(
+                success=False,
+                message="User Doesn't Exists!",
+                status=status.HTTP_404_NOT_FOUND
             )
         
         except Exception as err:
@@ -95,7 +115,7 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
                 serializer.save()
 
                 serialized_data = serializer.data
-                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                keys_to_remove = ["followers", "following", "is_following", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
 
                 info_logger.info(f'User info updated for user: {authenticated_user.username}')
@@ -201,8 +221,9 @@ def follower_info(request, userId):
         
         userId = form.cleaned_data['userId']
         result = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
+        following_users = get_following_user(request.user)
 
-        serializer = FollowerSerializer(result, many=True)
+        serializer = FollowerSerializer(result, many=True, context=following_users)
         info_logger.info(f'Follower info requested by user: {request.user.username} of user: {userId}')
         return generic_response(
                     success=True,

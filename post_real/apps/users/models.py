@@ -20,7 +20,7 @@ class User(AbstractUser):
     phone_no = models.CharField(_('phone no.'), max_length = 15, blank=True, null=True, validators=[RegexValidator(r'^[0-9-+]+$','Invalid Mobile Number'), MinLengthValidator(10)])
     bio = models.TextField(max_length=300)
     profilePicUrl = models.ImageField(upload_to='mediafiles/profilePics/', validators=[validate_image_size, FileExtensionValidator(allowed_extensions=['jpeg', 'jpg', 'png'])])
-    is_verified = models.BooleanField(default=False, editable=False)
+    is_verified = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     # USERNAME_FIELD = 'username'
@@ -53,8 +53,8 @@ class User(AbstractUser):
 
 
 class Connection(TimeStamp):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_user') 
-    following_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_following_user')  
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, related_name='connection_user') 
+    following_user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, related_name='connection_following_user')  
 
     class Meta:
         unique_together = ('user_id', 'following_user_id')

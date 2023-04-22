@@ -26,7 +26,7 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            # 'filters': ['require_debug_true'],
+            'filters': ['require_debug_true'],
             'formatter': 'verbose'
         },
         'django': {
@@ -55,7 +55,7 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.handlers.SysLogHandler',                                                    
             'formatter': 'verbose',
-            'address': (PAPERTRAIL_HOST, PAPERTRAIL_PORT)                                                 
+            # 'address': (PAPERTRAIL_HOST, PAPERTRAIL_PORT)                                                 
         },
     },
 
