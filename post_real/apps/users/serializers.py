@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields = [
-            "id",
+            'id',
             'username',
             'password',
             'email',
@@ -72,17 +72,41 @@ class UserSerializer(serializers.ModelSerializer):
         return urls
 
 
+class UserListSerializer(serializers.ModelSerializer):
+    urls = serializers.SerializerMethodField()
+
+    class Meta:
+        model=User
+        fields = [
+            'id',
+            'username',
+            'profilePicUrl',
+            'is_verified',
+            'urls',
+        ]
+    
+    def get_urls(self, user):
+        """
+        Get useful urls.
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % user.id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
+
+
 class ConnectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Connection
         fields = [
-            "id",
-            "userId",
-            "username",
-            "is_verified",
-            "profilePicUrl",
-            "is_following",
-            "urls",
+            'id',
+            'userId',
+            'username',
+            'is_verified',
+            'profilePicUrl',
+            'is_following',
+            'urls',
         ]
         abstract = True
 
@@ -114,7 +138,6 @@ class FollowerSerializer(ConnectionSerializer):
         return urls
     
     
-
 class FollowingSerializer(ConnectionSerializer):
     userId = serializers.ReadOnlyField(source="following_user_id_id")
     username = serializers.ReadOnlyField(source="following_user_id.username")

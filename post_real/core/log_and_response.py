@@ -4,12 +4,17 @@ from rest_framework import status
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S",)
 
+# initializing loggers with its types  
 logger = logging.getLogger('django')
 info_logger = logging.getLogger('postreal-info')
 error_logger = logging.getLogger('postreal-error')
 
 
 def generic_response(success:bool|None=None, message:str|None=None, data:dict|None=None, status:int|None=None, additional_data:dict|None=None):
+    """
+    Generic API response structure.
+    Returns response with same format for all apis.
+    """
     if not additional_data:
         additional_data = {}
 
@@ -24,6 +29,9 @@ def generic_response(success:bool|None=None, message:str|None=None, data:dict|No
 
 
 def log_exception(error):
+    """
+    Log and respond unknown exceptions. 
+    """
     error_logger.error(error)
     return generic_response(
                 success=False,
@@ -33,6 +41,9 @@ def log_exception(error):
 
 
 def log_field_error(error):
+    """
+    Response for Invalid Input/Field Error.
+    """
     return generic_response(
         success=False,
         message='Invalid Input/Field Error',
@@ -42,6 +53,9 @@ def log_field_error(error):
 
 
 def post_not_found_error():
+    """
+    Response for post doesn't exist exception.
+    """
     return generic_response(
             success=False,
             message="Post Doesn't Exists!",
