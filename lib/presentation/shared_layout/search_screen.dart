@@ -12,7 +12,8 @@ import 'package:provider/provider.dart';
 import '../../data/models/user.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final ScrollController searchFeedScrollController;
+  const SearchScreen({super.key, required this.searchFeedScrollController});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -121,6 +122,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return StaggeredGridView.countBuilder(
+                        controller: widget.searchFeedScrollController,
                         key: const PageStorageKey<String>('searchFeedPage'),
                         crossAxisCount: 3,
                         itemCount: postSnapshot.data!.docs.length,

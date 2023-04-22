@@ -8,7 +8,8 @@ import 'package:postreal/presentation/themes/dark_theme.dart';
 import 'package:postreal/presentation/widgets/post_card.dart';
 
 class FeedScreen extends StatelessWidget {
-  const FeedScreen({super.key});
+  final ScrollController feedScrollController;
+  const FeedScreen({super.key, required this.feedScrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,7 @@ class FeedScreen extends StatelessWidget {
                 );
               }
               return ListView.builder(
+                  controller: feedScrollController,
                   key: const PageStorageKey<String>('feedsPage'),
                   scrollDirection: Axis.vertical,
                   itemCount: snapshot.data!.docs.length,
