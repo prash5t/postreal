@@ -9,8 +9,7 @@ class PostSerializer(serializers.ModelSerializer):
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
     has_liked = serializers.SerializerMethodField()
-    like_info_url = serializers.SerializerMethodField()
-    comment_info_url = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
 
     class Meta:
         model=Post
@@ -27,8 +26,7 @@ class PostSerializer(serializers.ModelSerializer):
             "userId",
             "username",
             "profilePicUrl",
-            "like_info_url", 
-            "comment_info_url",
+            "urls",
         ]
         extra_kwargs={"userId": {"write_only":True}}
     
@@ -53,24 +51,19 @@ class PostSerializer(serializers.ModelSerializer):
         if not self.context: return False
         liked_post_of_user = self.context.get("liked_post_of_user")
         return True if post.id in liked_post_of_user else False
-
-    def get_like_info_url(self, post):
+    
+    def get_urls(self, post):
         """
-        Get likes info of the post. 
-        User details who liked the post.
+        Get useful urls
         """
         if not self.context: return None
         like_info_url = "/apis/v1/posts/like-info/%s/" % post
-        return like_info_url
-    
-    def get_comment_info_url(self, post):
-        """
-        Get comments info of the post. 
-        Comments with User details.
-        """
-        if not self.context: return None
         comment_info_url = "/apis/v1/posts/comment-info/%s/" % post
-        return comment_info_url
+        urls = {
+            "like_info_url": like_info_url,
+            "comment_info_url": comment_info_url,
+        }
+        return urls
 
 
 class LikeSerializer(serializers.ModelSerializer):

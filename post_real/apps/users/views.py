@@ -8,9 +8,8 @@ from rest_framework.decorators import api_view
 from .models import Connection, User
 from .serializers import UserSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.validation_form import UserIdValidationForm
+from post_real.core.query_helper import get_following_user
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -32,7 +31,7 @@ class UserRegisterView(generics.CreateAPIView):
                 serializer.save()
 
                 serialized_data = serializer.data
-                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                keys_to_remove = ["followers", "following", "is_following", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
 
                 info_logger.info(f'New user registered: {serialized_data.get("username")}')
@@ -49,29 +48,6 @@ class UserRegisterView(generics.CreateAPIView):
         except Exception as err:
             return log_exception(err)
 
-# class UserListView(generics.ListAPIView):
-#     # serializer_class = UserSerializer
-#     queryset = User.objects.all() 
-
-#     def list(self, request, *args, **kwargs):
-#         """
-#         List User.
-#         """
-#         try:
-#             authenticated_user = request.user
-
-#             serializer = self.serializer_class(self.queryset, context={"data":"data"})
-
-#             info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
-#             return generic_response(
-#                 success=True,
-#                 message='User Info',
-#                 data=serializer.data,
-#                 status=status.HTTP_200_OK
-#             )
-        
-#         except Exception as err:
-#             return log_exception(err)
 
 class UserOperationView(generics.GenericAPIView):
     """
@@ -97,7 +73,8 @@ class UserOperationView(generics.GenericAPIView):
                 user_id = form.cleaned_data['userId']
                 user = User.objects.get(id=user_id)
 
-            serializer = self.serializer_class(user, context={"data":"data"})
+            following_users = get_following_user(request.user)
+            serializer = self.serializer_class(user, context=following_users)
 
             info_logger.info(f'User: {request.user.username} requested details of user: {user.username}')
             return generic_response(
@@ -138,7 +115,7 @@ class UserOperationView(generics.GenericAPIView):
                 serializer.save()
 
                 serialized_data = serializer.data
-                keys_to_remove = ["followers", "following", "followers_info_url", "following_info_url"]
+                keys_to_remove = ["followers", "following", "is_following", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
 
                 info_logger.info(f'User info updated for user: {authenticated_user.username}')
