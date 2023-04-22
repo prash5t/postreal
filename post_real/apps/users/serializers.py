@@ -79,7 +79,10 @@ class ConnectionSerializer(serializers.ModelSerializer):
             "id",
             "userId",
             "username",
-            "profilePicUrl"
+            "is_verified",
+            "profilePicUrl",
+            "is_following",
+            "urls",
         ]
         abstract = True
 
@@ -87,11 +90,46 @@ class ConnectionSerializer(serializers.ModelSerializer):
 class FollowerSerializer(ConnectionSerializer):
     userId = serializers.ReadOnlyField(source="user_id_id")
     username = serializers.ReadOnlyField(source="user_id.username")
+    is_verified = serializers.ReadOnlyField(source="user_id.is_verified")
     profilePicUrl = serializers.ImageField(source="user_id.profilePicUrl", read_only=True)
+    is_following = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
+
+    def get_is_following(self, connection):
+        """
+        Check if current user has liked the post or not.
+        """
+        if not self.context: return False
+        following_users = self.context.get("following_users")
+        return True if connection.user_id_id in following_users else False
+
+    def get_urls(self, connection):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % connection.user_id_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
+    
     
 
 class FollowingSerializer(ConnectionSerializer):
     userId = serializers.ReadOnlyField(source="following_user_id_id")
     username = serializers.ReadOnlyField(source="following_user_id.username")
+    is_verified = serializers.ReadOnlyField(source="following_user_id.is_verified")
     profilePicUrl = serializers.ImageField(source="following_user_id.profilePicUrl", read_only=True)
+    is_following = serializers.BooleanField(default=True, read_only=True)
+    urls = serializers.SerializerMethodField()
+
+    def get_urls(self, connection):
+        """
+        Get useful urls
+        """
+        user_info_url = "/apis/v1/users/operation/?userId=%s" % connection.following_user_id_id
+        urls = {
+            "user_info_url": user_info_url,
+        }
+        return urls
     

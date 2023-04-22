@@ -221,8 +221,9 @@ def follower_info(request, userId):
         
         userId = form.cleaned_data['userId']
         result = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
+        following_users = get_following_user(request.user)
 
-        serializer = FollowerSerializer(result, many=True)
+        serializer = FollowerSerializer(result, many=True, context=following_users)
         info_logger.info(f'Follower info requested by user: {request.user.username} of user: {userId}')
         return generic_response(
                     success=True,

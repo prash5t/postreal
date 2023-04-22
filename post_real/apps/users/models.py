@@ -53,8 +53,8 @@ class User(AbstractUser):
 
 
 class Connection(TimeStamp):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_user') 
-    following_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connection_following_user')  
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, related_name='connection_user') 
+    following_user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, related_name='connection_following_user')  
 
     class Meta:
         unique_together = ('user_id', 'following_user_id')
