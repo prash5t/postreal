@@ -5,10 +5,12 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 
 
-from .models import Connection
+from .models import Connection, User
 from .serializers import UserSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.validation_form import UserIdValidationForm
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -47,8 +49,31 @@ class UserRegisterView(generics.CreateAPIView):
         except Exception as err:
             return log_exception(err)
 
+# class UserListView(generics.ListAPIView):
+#     # serializer_class = UserSerializer
+#     queryset = User.objects.all() 
 
-class UserListUpdateDeleteView(generics.GenericAPIView):
+#     def list(self, request, *args, **kwargs):
+#         """
+#         List User.
+#         """
+#         try:
+#             authenticated_user = request.user
+
+#             serializer = self.serializer_class(self.queryset, context={"data":"data"})
+
+#             info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
+#             return generic_response(
+#                 success=True,
+#                 message='User Info',
+#                 data=serializer.data,
+#                 status=status.HTTP_200_OK
+#             )
+        
+#         except Exception as err:
+#             return log_exception(err)
+
+class UserOperationView(generics.GenericAPIView):
     """
     View to list details of user, update and delete user.
     """
@@ -60,16 +85,34 @@ class UserListUpdateDeleteView(generics.GenericAPIView):
         List details of authenticated user.
         """
         try:
-            authenticated_user = request.user
+            user = request.user
 
-            serializer = self.serializer_class(authenticated_user, context={"data":"data"})
+            if userId:=request.query_params.get("userId"):
+                form = UserIdValidationForm({"userId":userId})
+                if not form.is_valid():
+                    info_logger.warn(f'Field error / Bad Request from user: {user.username} while requesting user info.')
+                    return log_field_error(
+                        {"userId": ["Invalid uuid!"]}
+                    )
+                user_id = form.cleaned_data['userId']
+                user = User.objects.get(id=user_id)
 
-            info_logger.info(f'User info requested for user: {serializer.data.get("username")}')
+            serializer = self.serializer_class(user, context={"data":"data"})
+
+            info_logger.info(f'User: {request.user.username} requested details of user: {user.username}')
             return generic_response(
                 success=True,
                 message='User Info',
                 data=serializer.data,
                 status=status.HTTP_200_OK
+            )
+
+        except User.DoesNotExist:
+            info_logger.warn(f'User: {user.username} tried to list details of non existing user')
+            return generic_response(
+                success=False,
+                message="User Doesn't Exists!",
+                status=status.HTTP_404_NOT_FOUND
             )
         
         except Exception as err:
