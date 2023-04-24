@@ -3,7 +3,6 @@ from .models import Post, Like, Comment
 
 
 class PostSerializer(serializers.ModelSerializer):
-    userId = serializers.ReadOnlyField(source="userId.id")
     username = serializers.ReadOnlyField(source="userId.username")
     is_verified = serializers.ReadOnlyField(source="userId.is_verified")
     profilePicUrl = serializers.ImageField(source="userId.profilePicUrl", read_only=True)
@@ -30,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
             "profilePicUrl",
             "urls",
         ]
-        extra_kwargs={"userId": {"write_only":True}}
+        # extra_kwargs={"userId": {"write_only":True}}
     
     def get_total_likes(self, post):
         """
