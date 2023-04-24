@@ -20,3 +20,7 @@ AWS_S3_REGION_NAME = "<region_name>"
 # papertrail logs configuration
 PAPERTRAIL_HOST = "<papertrail_host>"
 PAPERTRAIL_PORT = "<papertrail_port>"
+
+# telegram bot configuration
+BOT_TOKEN = "<telegram_bot_token>"
+CHAT_ID = "<list_of_chat_ids>"

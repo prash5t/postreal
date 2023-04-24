@@ -21,8 +21,8 @@ def generic_response(success:bool|None=None, message:str|None=None, data:dict|No
     response_body = {
         "success": success,
         "message": message,
+        **additional_data,
         "data": data or {},
-        **additional_data
       }
     
     return Response(response_body, status)
