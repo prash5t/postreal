@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 
 # This environment variable has to be specified
 # Let it fail if not specified
-ENVIRON = os.environ.get("ENVIRON").lower()
+ENVIRON = os.environ.get("ENVIRON")
 assert ENVIRON in ["prod", "dev", "local"]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
