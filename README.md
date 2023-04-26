@@ -24,6 +24,11 @@ AWS_SECRET_ACCESS_KEY = <secret_access_key>
 AWS_STORAGE_BUCKET_NAME = <bucket_name>
 AWS_S3_REGION_NAME = <region_name>
 
+#smtp configuration
+EMAIL_HOST_USERNAME = <sender_email>
+EMAIL_HOST_PASSWORD = <app_password>
+EMAIL_PORT = <email_port>
+
 # papertrail logs configuration
 PAPERTRAIL_HOST = <papertrail_host>
 PAPERTRAIL_PORT = <papertrail_port>

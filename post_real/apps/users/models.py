@@ -2,6 +2,7 @@ import uuid
 from PIL import Image
 
 from django.db import models
+from django.utils import timezone 
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -63,3 +64,13 @@ class Connection(TimeStamp):
     def clean(self):
         if self.user_id == self.following_user_id:
             raise ValidationError("User cannot follow themselves!")
+
+
+def get_expiry_date():
+    return timezone.now() + timezone.timedelta(minutes=15)
+
+
+class Otp(models.Model):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
+    otp = models.SmallIntegerField(editable=False)
+    expire_at = models.DateTimeField(default=get_expiry_date(), editable=False) 

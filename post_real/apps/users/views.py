@@ -5,6 +5,7 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 
 from .models import Connection, User
+from post_real.services.send_email import email_verification
 from post_real.core.custom_pagination import UserListPagination
 from post_real.core.validation_form import UserIdValidationForm
 from post_real.core.query_helper import get_following_user, paginate_queryset
@@ -29,6 +30,7 @@ class UserRegisterView(generics.CreateAPIView):
             serializer = self.serializer_class(data=payload)
             if serializer.is_valid():
                 serializer.save()
+                email_verification(user_id=serializer.data["id"])
 
                 serialized_data = serializer.data
                 keys_to_remove = ["followers", "following", "is_following", "urls"]
