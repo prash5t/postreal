@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 
 # This environment variable has to be specified
 # Let it fail if not specified
-ENVIRON = os.environ.get("ENVIRON").lower()
+ENVIRON = os.environ.get("ENVIRON")
 assert ENVIRON in ["prod", "dev", "local"]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -50,7 +50,7 @@ WSGI_APPLICATION = 'post_real.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
@@ -93,6 +93,15 @@ else:
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
     AWS_S3_VERIFY = True
+
+
+# SMTP Configuration for sending mail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USERNAME')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 # papertrail logs

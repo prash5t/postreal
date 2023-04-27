@@ -2,6 +2,7 @@ import uuid
 from PIL import Image
 
 from django.db import models
+from django.utils import timezone 
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -21,6 +22,7 @@ class User(AbstractUser):
     bio = models.TextField(max_length=300)
     profilePicUrl = models.ImageField(upload_to='mediafiles/profilePics/', validators=[validate_image_size, FileExtensionValidator(allowed_extensions=['jpeg', 'jpg', 'png'])])
     is_verified = models.BooleanField(default=False)
+    is_email_verified = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     # USERNAME_FIELD = 'username'
@@ -62,3 +64,13 @@ class Connection(TimeStamp):
     def clean(self):
         if self.user_id == self.following_user_id:
             raise ValidationError("User cannot follow themselves!")
+
+
+def get_expiry_date():
+    return timezone.now() + timezone.timedelta(minutes=15)
+
+
+class Otp(models.Model):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
+    otp = models.SmallIntegerField(editable=False)
+    expire_at = models.DateTimeField(default=get_expiry_date(), editable=False) 
