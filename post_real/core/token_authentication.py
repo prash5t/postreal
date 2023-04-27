@@ -1,8 +1,10 @@
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework_simplejwt.views import TokenViewBase
-from post_real.core.log_and_response import generic_response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from post_real.core.log_and_response import generic_response
+from post_real.services.send_email import email_verification
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
@@ -14,8 +16,9 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         user = self.user
         if not user.is_email_verified:
+            email_verification(user_id=user.id)  # execute this in delay (celery worker) 
             raise serializers.ValidationError({
-                "detail": "This account is not verified. Please verify your email first."
+                "detail": "This account is not verified. Please verify your account with otp sent on your registered email."
             })
         return data
 

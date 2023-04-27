@@ -32,7 +32,7 @@ class UserRegisterView(generics.CreateAPIView):
             serializer = self.serializer_class(data=payload)
             if serializer.is_valid():
                 serializer.save()
-                email_verification(user_id=serializer.data["id"])
+                email_verification(user_id=serializer.data["id"]) # execute this in delay (celery worker) 
 
                 serialized_data = serializer.data
                 keys_to_remove = ["followers", "following", "is_following", "urls"]
@@ -41,7 +41,7 @@ class UserRegisterView(generics.CreateAPIView):
                 info_logger.info(f'New user registered: {serialized_data.get("username")}')
                 return generic_response(
                     success=True,
-                    message='User Registered Successfully',
+                    message='User Registered Successfully. Please verify your account with otp sent on your registered email.',
                     data=serialized_data,
                     status=status.HTTP_200_OK
                 )
