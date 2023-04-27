@@ -66,9 +66,8 @@ class PostViewSet(viewsets.ModelViewSet):
                 form = UserIdValidationForm({"userId":userId})
                 if not form.is_valid():
                     info_logger.warn(f'Field error / Bad Request from user: {user.username} while requesting post info.')
-                    return log_field_error(
-                        {"userId": ["Invalid uuid!"]}
-                    )
+                    return log_field_error(form.errors)
+                
                 user_id = form.cleaned_data["userId"]
                 user = User.objects.get(id=user_id)
 
@@ -260,12 +259,7 @@ def comment_on_post(request):
         form = CommentValidationForm(request.data)
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while commenting on post')
-            return log_field_error(
-                {
-                "postId": ["This field is required.", "Field type must be int."],
-                "comment": ["This field is required.", "Field type must be str.", "Max-lenght: 150"]
-                }
-            )
+            return log_field_error(form.errors)
         
         post_id = form.cleaned_data["postId"]
         comment = form.cleaned_data["comment"]

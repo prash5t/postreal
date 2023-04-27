@@ -1,14 +1,16 @@
+from django.db.models import Q
+from django.utils import timezone
 from django.db import IntegrityError
 
 from rest_framework import status
 from rest_framework import generics
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 
-from .models import Connection, User
+from .models import Connection, User, Otp
 from post_real.services.send_email import email_verification
 from post_real.core.custom_pagination import UserListPagination
-from post_real.core.validation_form import UserIdValidationForm
 from post_real.core.query_helper import get_following_user, paginate_queryset
+from post_real.core.validation_form import UserIdValidationForm, OtpValidationForm
 from .serializers import UserSerializer, UserListSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
 
@@ -108,9 +110,8 @@ class UserOperationView(generics.GenericAPIView):
                 form = UserIdValidationForm({"userId":userId})
                 if not form.is_valid():
                     info_logger.warn(f'Field error / Bad Request from user: {user.username} while requesting user info.')
-                    return log_field_error(
-                        {"userId": ["Invalid uuid!"]}
-                    )
+                    return log_field_error(form.errors)
+                
                 user_id = form.cleaned_data['userId']
                 user = User.objects.get(id=user_id)
 
@@ -204,9 +205,7 @@ def follow_unfollow_user(request, userId):
         form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {authenticated_user.username} while following user')
-            return log_field_error(
-                {"userId": ["Invalid uuid!"]}
-            )
+            return log_field_error(form.errors)
 
         following_user_id = form.cleaned_data['userId']
         if following_user_id == authenticated_user.id:
@@ -256,9 +255,7 @@ def follower_info(request, userId):
         form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {request.user.username} while requesting followers info.')
-            return log_field_error(
-                {"userId": ["Invalid uuid!"]}
-            )
+            return log_field_error(form.errors)
         
         userId = form.cleaned_data['userId']
         result = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
@@ -286,9 +283,7 @@ def following_info(request, userId):
         form = UserIdValidationForm({"userId":userId})
         if not form.is_valid():
             info_logger.warn(f'Field error / Bad Request from user: {request.user.username} while requesting following info.')
-            return log_field_error(
-                {"userId": ["Invalid uuid!"]}
-            )
+            return log_field_error(form.errors)
         
         userId = form.cleaned_data['userId']
         result = Connection.objects.filter(user_id=userId).select_related("following_user_id").order_by("-created_at")
@@ -301,6 +296,43 @@ def following_info(request, userId):
                     data=serializer.data,
                     status=status.HTTP_200_OK
                 )
+    
+    except Exception as err:
+        return log_exception(err)
+
+
+@api_view(["POST"])
+@permission_classes([])
+def verify_otp(request):
+    """
+    Verify otp for email verification.
+    """
+    try:
+        form = OtpValidationForm(request.data)
+        if not form.is_valid():
+            info_logger.warn(f'Field error / Bad Request from anonymous user for email verification')
+            return log_field_error(form.errors)
+        
+        otp = form.cleaned_data['otp']
+        user = form.cleaned_data['username']
+
+        result = Otp.objects.get(Q(otp=otp) & Q(expire_at__gt=timezone.now()) & (Q(user_id__username=user) | Q(user_id__email=user)))
+        if result:
+            User.objects.filter(Q(username=user) | Q(email=user)).update(is_email_verified=True)
+            info_logger.info(f'Email verification success for user: {user}')
+            return generic_response(
+                        success=True,
+                        message="Email Verified Successfully!",
+                        status=status.HTTP_200_OK
+                    )
+    
+    except Otp.DoesNotExist:
+            info_logger.warn(f'Bad Request! Email verification of user: {user} failed.')
+            return generic_response(
+                success=False,
+                message="Bad Request! Email Verification Failed. Try again with new otp.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     except Exception as err:
         return log_exception(err)

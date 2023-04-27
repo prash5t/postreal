@@ -72,5 +72,5 @@ def get_expiry_date():
 
 class Otp(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
-    otp = models.SmallIntegerField(editable=False)
+    otp = models.SmallIntegerField(editable=False, db_index=True)
     expire_at = models.DateTimeField(default=get_expiry_date(), editable=False) 
