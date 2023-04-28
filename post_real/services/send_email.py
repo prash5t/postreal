@@ -6,6 +6,7 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from post_real.apps.users.models import User, Otp
+from post_real.core.time_stamp_model import get_otp_expiry_date
 
 
 def email_verification(user_id:UUID) -> None:
@@ -35,5 +36,8 @@ def generate_otp_and_save(user_id:UUID) -> int:
     Generate 4 digit otp and save. 
     """
     otp = random.randint(1000, 9999)
-    Otp.objects.update_or_create(user_id_id=user_id, otp=otp)
+    result, is_created = Otp.objects.get_or_create(user_id_id=user_id)
+    result.otp = otp
+    result.expire_at=get_otp_expiry_date()
+    result.save()
     return otp

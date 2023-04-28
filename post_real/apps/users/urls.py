@@ -4,6 +4,7 @@ from django.urls import path
 
 urlpatterns = [
     path('register/', views.UserRegisterView.as_view(), name='register_user'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('list/', views.UserListView.as_view(), name='list_user'),
     path('operation/', views.UserOperationView.as_view(), name='user_operation'),
     path('follow-unfollow/<str:userId>/', views.follow_unfollow_user, name='follow_unfollow_user'),

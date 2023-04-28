@@ -1,4 +1,9 @@
 from django.db import models
+from django.utils import timezone
+
+
+def get_otp_expiry_date():
+    return timezone.now() + timezone.timedelta(minutes=15)
 
 
 class TimeStamp(models.Model):

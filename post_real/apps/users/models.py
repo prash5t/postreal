@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinLengthValidator, FileExtensionValidator
 
 from post_real.core.image_size_validator import validate_image_size
-from post_real.core.time_stamp_model import TimeStamp
+from post_real.core.time_stamp_model import TimeStamp, get_otp_expiry_date
 
 
 class User(AbstractUser):
@@ -66,11 +66,7 @@ class Connection(TimeStamp):
             raise ValidationError("User cannot follow themselves!")
 
 
-def get_expiry_date():
-    return timezone.now() + timezone.timedelta(minutes=15)
-
-
 class Otp(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
-    otp = models.SmallIntegerField(editable=False)
-    expire_at = models.DateTimeField(default=get_expiry_date(), editable=False) 
+    otp = models.SmallIntegerField(default=0000, editable=False, db_index=True)
+    expire_at = models.DateTimeField(default=get_otp_expiry_date(), editable=False) 
