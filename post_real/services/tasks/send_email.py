@@ -1,14 +1,17 @@
 import random
 from uuid import UUID
+from celery import shared_task 
 
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from post_real.apps.users.models import User, Otp
+from post_real.core.log_and_response import info_logger
 from post_real.core.time_stamp_model import get_otp_expiry_date
 
 
+@shared_task(name="sendVerificationEmail")
 def email_verification(user_id:UUID) -> None:
     """
     Send email to user with otp for email verification.
@@ -25,6 +28,7 @@ def email_verification(user_id:UUID) -> None:
                 'otp': otp,
             })
     
+    info_logger.info('Send email event triggered. Sending account verification email to: %s' % receiver)
     email_receive = EmailMessage(subject, body, sender, [receiver])
     email_receive.content_subtype= 'html'
     email_receive.fail_silently=True

@@ -29,6 +29,9 @@ EMAIL_HOST_USERNAME = <sender_email>
 EMAIL_HOST_PASSWORD = <app_password>
 EMAIL_PORT = <email_port>
 
+#celery broker url
+CELERY_BROKER_URL = <broker_url>
+
 # papertrail logs configuration
 PAPERTRAIL_HOST = <papertrail_host>
 PAPERTRAIL_PORT = <papertrail_port>
