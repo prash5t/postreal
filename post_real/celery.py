@@ -17,7 +17,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks([
     "post_real.services.tasks.delete_expired_otp",
-    "post_real.services.tasks.send_email"
+    "post_real.services.tasks.send_email",
+    "post_real.services.tasks.send_logs_to_telegram",
 ])
 
 app.conf.broker_transport_options = {
