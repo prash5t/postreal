@@ -6,10 +6,11 @@ from rest_framework.decorators import api_view
 
 from .models import Post, Like, Comment
 from post_real.apps.users.models import User
-from .serializers import PostSerializer, LikeSerializer, CommentSerializer
-from post_real.core.validation_form import CommentValidationForm, UserIdValidationForm
-from post_real.core.query_helper import get_liked_post_of_user
 from post_real.core.authorization import check_user_access_on_post
+from .serializers import PostSerializer, LikeSerializer, CommentSerializer
+from post_real.core.query_helper import get_liked_post_of_user, paginate_queryset
+from post_real.core.validation_form import CommentValidationForm, UserIdValidationForm
+from post_real.core.custom_pagination import PostListPagination, CommentListPagination, UserListPagination
 from post_real.core.log_and_response import info_logger, generic_response, log_exception, log_field_error, post_not_found_error
 
 
@@ -19,6 +20,7 @@ class PostViewSet(viewsets.ModelViewSet):
     """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    pagination_class = PostListPagination
 
 
     def create(self, request, *args, **kwargs):
@@ -71,8 +73,11 @@ class PostViewSet(viewsets.ModelViewSet):
                 user_id = form.cleaned_data["userId"]
                 user = User.objects.get(id=user_id)
 
-            result = user.post_user.prefetch_related('like_post', 'comment_post').order_by('-created_at') 
+            queryset = user.post_user.prefetch_related('like_post', 'comment_post').order_by('-created_at') 
             liked_post_of_user = get_liked_post_of_user(request.user)
+
+            paginator = self.pagination_class()
+            result, additional_data = paginate_queryset(paginator, queryset, request)
 
             serializer = self.serializer_class(result, many=True, context=liked_post_of_user)
 
@@ -81,6 +86,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 success=True,
                 message='Posts Info',
                 data=serializer.data,
+                additional_data=additional_data,
                 status=status.HTTP_200_OK
             )
         
@@ -146,7 +152,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
                 info_logger.info(f'Post info updated for user: {authenticated_user.username}, post: {post_obj.id}')
                 serialized_data = serializer.data
-                keys_to_remove = ["total_likes", "total_comments", "has_liked", "like_info_url", "comment_info_url"]
+                keys_to_remove = ["total_likes", "total_comments", "has_liked", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
                 return generic_response(
                     success=True,
@@ -234,13 +240,16 @@ def like_info(request, postId):
     Get total likes and users who liked the post.
     """
     try:
-        result = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        queryset = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        paginator  = UserListPagination()
+        result, additional_data = paginate_queryset(paginator, queryset, request)
         serializer = LikeSerializer(result, many=True)
         info_logger.info(f'Like info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
                     message='Users Info Who Liked The Post',
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
@@ -289,12 +298,15 @@ def comment_info(request, postId):
     """
     try:
         result = Comment.objects.filter(postId_id=postId).select_related('commented_by').order_by("-created_at")
+        paginator  = CommentListPagination()
+        result, additional_data = paginate_queryset(paginator, result, request)
         serializer = CommentSerializer(result, many=True)
         info_logger.info(f'Comment info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
                     message="Comments With User Info",
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
@@ -313,8 +325,11 @@ def feed(request):
         following_user_ids = list(authenticated_user.connection_user.values_list("following_user_id", flat=True))
         following_user_ids.append(authenticated_user.id)
 
-        result = Post.objects.filter(userId__in=following_user_ids).select_related('userId').prefetch_related('like_post', 'comment_post').order_by('-created_at') 
+        queryset = Post.objects.filter(userId__in=following_user_ids).select_related('userId').prefetch_related('like_post', 'comment_post').order_by('-created_at') 
         liked_post_of_user = get_liked_post_of_user(authenticated_user)
+
+        paginator = PostListPagination()
+        result, additional_data = paginate_queryset(paginator, queryset, request)
 
         serializer = PostSerializer(result, many=True, context=liked_post_of_user)
 
@@ -323,6 +338,7 @@ def feed(request):
             success=True,
             message='Timeline Feed',
             data=serializer.data,
+            additional_data=additional_data,
             status=status.HTTP_200_OK
         )
     

@@ -1,7 +1,13 @@
+from typing import Tuple, Dict, Any
+
+from django.http import HttpRequest
+from django.core.paginator import Paginator
+from django.db.models.query import QuerySet
+
 from post_real.apps.users.models import User
 
 
-def get_liked_post_of_user(user:User):
+def get_liked_post_of_user(user:User) -> Dict[str, Any]:
     """
     Get list of post id that are like by authenticated user.
     """
@@ -10,7 +16,7 @@ def get_liked_post_of_user(user:User):
     return context
 
 
-def get_following_user(user:User):
+def get_following_user(user:User) -> Dict[str, Any]:
     """
     Get list of user ids whom are followed by authenticated user.
     """
@@ -19,7 +25,7 @@ def get_following_user(user:User):
     return context
 
 
-def paginate_queryset(paginator, queryset, request):
+def paginate_queryset(paginator: Paginator, queryset: QuerySet, request: HttpRequest) -> Tuple[QuerySet, Dict[str, Any]]:
     """
     Paginate queryset and get paginated response.
     """

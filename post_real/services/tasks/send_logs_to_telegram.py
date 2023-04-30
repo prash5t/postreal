@@ -3,6 +3,7 @@ import telepot
 import requests
 from celery import shared_task
 
+
 @shared_task(name="logOnTelegram")
 def log_info_on_telegram(log:str, bot_token:str, chat_id:str|list) -> None:
     """
