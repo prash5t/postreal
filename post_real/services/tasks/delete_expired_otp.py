@@ -1,4 +1,5 @@
 from celery import shared_task
+
 from django.utils import timezone
 
 from post_real.apps.users.models import Otp

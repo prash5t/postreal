@@ -1,8 +1,13 @@
+from typing import Tuple, Dict, Any
+
 from rest_framework import status
+
+from post_real.apps.users.models import User
+from post_real.apps.posts.models import Post
 from post_real.core.log_and_response import info_logger
 
 
-def check_user_access_on_post(user:object, post:object):
+def check_user_access_on_post(user:User, post:Post) -> Tuple[Dict[str, Any], bool]:
     """
     Verify user if they are updating/deleting post of self.
     Restricts user from updating/deleting post of other users.

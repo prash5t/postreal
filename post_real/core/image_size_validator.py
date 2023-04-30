@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 
-def validate_image_size(image):
+
+def validate_image_size(image: UploadedFile) -> None:
     """
     Validate image size.
     Rejects image which is more than 25 MB.

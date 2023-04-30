@@ -1,6 +1,9 @@
 import logging
-from rest_framework.response import Response
+from typing import Any
+
 from rest_framework import status
+from rest_framework.response import Response
+
 
 # logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S",)
 
@@ -10,7 +13,7 @@ info_logger = logging.getLogger('postreal-info')
 error_logger = logging.getLogger('postreal-error')
 
 
-def generic_response(success:bool|None=None, message:str|None=None, data:dict|None=None, status:int|None=None, additional_data:dict|None=None):
+def generic_response(success:bool|None=None, message:str|None=None, data:dict|None=None, status:int|None=None, additional_data:dict|None=None) -> Response:
     """
     Generic API response structure.
     Returns response with same format for all apis.
@@ -28,7 +31,8 @@ def generic_response(success:bool|None=None, message:str|None=None, data:dict|No
     return Response(response_body, status)
 
 
-def log_exception(error):
+
+def log_exception(error:Any) -> Response:
     """
     Log and respond unknown exceptions. 
     """
@@ -40,7 +44,7 @@ def log_exception(error):
             )
 
 
-def log_field_error(error):
+def log_field_error(error:Any) -> Response:
     """
     Response for Invalid Input/Field Error.
     """
@@ -52,7 +56,7 @@ def log_field_error(error):
     )
 
 
-def post_not_found_error():
+def post_not_found_error() -> Response:
     """
     Response for post doesn't exist exception.
     """
