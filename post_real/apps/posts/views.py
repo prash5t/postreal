@@ -6,11 +6,11 @@ from rest_framework.decorators import api_view
 
 from .models import Post, Like, Comment
 from post_real.apps.users.models import User
-from post_real.core.custom_pagination import PostListPagination
 from post_real.core.authorization import check_user_access_on_post
 from .serializers import PostSerializer, LikeSerializer, CommentSerializer
 from post_real.core.query_helper import get_liked_post_of_user, paginate_queryset
 from post_real.core.validation_form import CommentValidationForm, UserIdValidationForm
+from post_real.core.custom_pagination import PostListPagination, CommentListPagination, UserListPagination
 from post_real.core.log_and_response import info_logger, generic_response, log_exception, log_field_error, post_not_found_error
 
 
@@ -240,13 +240,16 @@ def like_info(request, postId):
     Get total likes and users who liked the post.
     """
     try:
-        result = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        queryset = Like.objects.filter(postId_id=postId).select_related('liked_by').order_by("-created_at")
+        paginator  = UserListPagination()
+        result, additional_data = paginate_queryset(paginator, queryset, request)
         serializer = LikeSerializer(result, many=True)
         info_logger.info(f'Like info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
                     message='Users Info Who Liked The Post',
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
@@ -295,12 +298,15 @@ def comment_info(request, postId):
     """
     try:
         result = Comment.objects.filter(postId_id=postId).select_related('commented_by').order_by("-created_at")
+        paginator  = CommentListPagination()
+        result, additional_data = paginate_queryset(paginator, result, request)
         serializer = CommentSerializer(result, many=True)
         info_logger.info(f'Comment info requested by user: {request.user.username} for post: {postId}')
         return generic_response(
                     success=True,
                     message="Comments With User Info",
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
