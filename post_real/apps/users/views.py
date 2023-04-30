@@ -258,8 +258,11 @@ def follower_info(request, userId):
             return log_field_error(form.errors)
         
         userId = form.cleaned_data['userId']
-        result = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
+        queryset = Connection.objects.filter(following_user_id=userId).select_related("user_id").order_by("-created_at")
         following_users = get_following_user(request.user)
+
+        paginator = UserListPagination()
+        result, additional_data = paginate_queryset(paginator, queryset, request)
 
         serializer = FollowerSerializer(result, many=True, context=following_users)
         info_logger.info(f'Follower info requested by user: {request.user.username} of user: {userId}')
@@ -267,6 +270,7 @@ def follower_info(request, userId):
                     success=True,
                     message="Followers Info",
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
@@ -286,7 +290,10 @@ def following_info(request, userId):
             return log_field_error(form.errors)
         
         userId = form.cleaned_data['userId']
-        result = Connection.objects.filter(user_id=userId).select_related("following_user_id").order_by("-created_at")
+        queryset = Connection.objects.filter(user_id=userId).select_related("following_user_id").order_by("-created_at")
+        
+        paginator = UserListPagination()
+        result, additional_data = paginate_queryset(paginator, queryset, request)
 
         serializer = FollowingSerializer(result, many=True)
         info_logger.info(f'Following users info requested by user: {request.user.username} of user: {userId}')
@@ -294,6 +301,7 @@ def following_info(request, userId):
                     success=True,
                     message="Following Users Info",
                     data=serializer.data,
+                    additional_data=additional_data,
                     status=status.HTTP_200_OK
                 )
     
