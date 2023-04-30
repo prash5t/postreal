@@ -20,8 +20,8 @@ from dotenv import load_dotenv
 
 # This environment variable has to be specified
 # Let it fail if not specified
-ENVIRON = os.environ.get("ENVIRON")
-assert ENVIRON in ["prod", "dev", "local"]
+# ENVIRON = os.environ.get("ENVIRON")
+# assert ENVIRON in ["prod", "dev", "local"]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -112,3 +112,8 @@ PAPERTRAIL_PORT = int(os.environ.get("PAPERTRAIL_PORT"))
 #telegram log
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
+
+
+# celery configuration 
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+CELERY_TIMEZONE = 'Asia/Kathmandu'
