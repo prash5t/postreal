@@ -10,8 +10,6 @@ import 'package:postreal/presentation/shared_layout/addphoto_screen.dart';
 import 'package:postreal/presentation/shared_layout/home_screen.dart';
 import 'package:postreal/presentation/shared_layout/login_screen.dart';
 import 'package:postreal/presentation/shared_layout/register_screen.dart';
-import 'package:postreal/presentation/themes/dark_theme.dart';
-import 'package:postreal/presentation/themes/light_theme.dart';
 import 'package:postreal/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'constants/routes.dart';
