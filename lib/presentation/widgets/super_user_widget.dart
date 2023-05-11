@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:postreal/presentation/widgets/custom_text.dart';
 import 'package:postreal/presentation/widgets/user_dp.dart';
 import 'package:postreal/presentation/widgets/username_widget.dart';
-import 'package:postreal/utils/pay_with_khalti.dart';
+import 'package:postreal/utils/stripe/make_stripe_payment.dart';
 
-class SuperUserWidget extends StatelessWidget {
+class SuperUserWidget extends StatefulWidget {
   final bool isVerified;
   final String username;
   final String dpUrl;
@@ -16,22 +16,29 @@ class SuperUserWidget extends StatelessWidget {
       required this.dpUrl});
 
   @override
+  State<SuperUserWidget> createState() => _SuperUserWidgetState();
+}
+
+class _SuperUserWidgetState extends State<SuperUserWidget> {
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isVerified
+      onTap: widget.isVerified
           ? null
           : () {
-              payWithKhalti();
+              /// fyi: using stripe
+              makePayment();
             },
       child: ListTile(
-        tileColor: isVerified ? null : Colors.teal,
-        leading: UserDP(dpUrl: dpUrl, isVerified: isVerified),
-        title: UsernameWidget(isVerified: isVerified, username: username),
+        tileColor: widget.isVerified ? null : Colors.teal,
+        leading: UserDP(dpUrl: widget.dpUrl, isVerified: widget.isVerified),
+        title: UsernameWidget(
+            isVerified: widget.isVerified, username: widget.username),
         subtitle: CustomText(
-            text: isVerified
+            text: widget.isVerified
                 ? "Super User"
-                : "Become a Super User at just Rs 1."),
-        trailing: isVerified ? null : const Icon(CupertinoIcons.forward),
+                : "Become a Super User at just \$1.99."),
+        trailing: widget.isVerified ? null : const Icon(CupertinoIcons.forward),
       ),
     );
   }

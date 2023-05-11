@@ -27,7 +27,7 @@ PaymentConfig superuserProductConfig = PaymentConfig(
 
 // function to call when payment is succeed
 void superUserPaymentSuccess(PaymentSuccessModel successModel) async {
-  await FirestoreMethods().savePayment(successModel);
+  await FirestoreMethods().saveKhaltiPayment(successModel);
   Fluttertoast.showToast(msg: "You are now a super user.");
   Navigator.of(navKey.currentContext!)
       .pushNamedAndRemoveUntil(AppRoutes.homescreen, (route) => false);

@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:khalti_flutter/khalti_flutter.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/business_logic/switch_theme_cubit/switch_theme_cubit.dart';
 import 'package:postreal/my_keys.dart';
@@ -16,6 +16,8 @@ import 'constants/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = stripePublishableKey;
+  await Stripe.instance.applySettings();
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
@@ -42,41 +44,26 @@ class MyApp extends StatelessWidget {
           minTextAdapt: true,
           splitScreenMode: true,
           builder: (context, child) {
-            return KhaltiScope(
-                enabledDebugging: true,
-                publicKey: khaltiPublicKey,
-                navigatorKey: navKey,
-                builder: (context, navKey) {
-                  return BlocBuilder<SwitchThemeCubit, ThemeData>(
-                    builder: (context, themeToShow) {
-                      BlocProvider.of<SwitchThemeCubit>(context)
-                          .emitAppOpeningTheme();
-                      return MaterialApp(
-                          debugShowCheckedModeBanner: false,
-                          navigatorKey: navKey,
-                          supportedLocales: const [
-                            Locale('en', 'US'),
-                            Locale('ne', 'NP'),
-                          ],
-                          localizationsDelegates: const [
-                            KhaltiLocalizations.delegate
-                          ],
-                          title: 'PostReal',
-                          theme: themeToShow,
-                          routes: {
-                            AppRoutes.loginscreen: (context) =>
-                                const LoginScreen(),
-                            AppRoutes.registerscreen: (context) =>
-                                const RegisterScreen(),
-                            AppRoutes.addPostScreen: (context) =>
-                                const AddPostScreen(),
-                            AppRoutes.homescreen: (context) =>
-                                const HomeScreen(),
-                          },
-                          home: const AppEntry());
+            return BlocBuilder<SwitchThemeCubit, ThemeData>(
+              builder: (context, themeToShow) {
+                BlocProvider.of<SwitchThemeCubit>(context)
+                    .emitAppOpeningTheme();
+                return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    navigatorKey: navKey,
+                    title: 'PostReal',
+                    theme: themeToShow,
+                    routes: {
+                      AppRoutes.loginscreen: (context) => const LoginScreen(),
+                      AppRoutes.registerscreen: (context) =>
+                          const RegisterScreen(),
+                      AppRoutes.addPostScreen: (context) =>
+                          const AddPostScreen(),
+                      AppRoutes.homescreen: (context) => const HomeScreen(),
                     },
-                  );
-                });
+                    home: const AppEntry());
+              },
+            );
           }),
     );
   }

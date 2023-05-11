@@ -13,8 +13,8 @@ class FirestoreMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthMethods _authMethods = AuthMethods();
 
-  //function to save success payment record for Super User
-  Future<void> savePayment(PaymentSuccessModel successModel) async {
+  //function to save payment record for Super User using Khalti
+  Future<void> saveKhaltiPayment(PaymentSuccessModel successModel) async {
     await _firestore
         .collection('users')
         .doc(_authMethods.auth.currentUser!.uid)
