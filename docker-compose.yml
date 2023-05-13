@@ -11,6 +11,7 @@ services:
   worker:
     build: .
     command: celery -A post_real.celery worker --loglevel=info
+    #command: celery -A multi start w0 w1 post_real.celery --loglevel=info   #create multiple worker
     env_file:
       - .env
     depends_on:
@@ -22,4 +23,15 @@ services:
     env_file:
       - .env
     depends_on:
+      - web
+
+  flower:
+    build: .
+    command: celery -A post_real.celery flower --address=0.0.0.0 --port=5555 --basic_auth=username:password
+    ports:
+      - 5555:5555
+    env_file:
+      - .env
+    depends_on:
+      - worker
       - web
