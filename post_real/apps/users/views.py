@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
 from django.db import IntegrityError
+from django_ratelimit.decorators import ratelimit
 
 from rest_framework import status
 from rest_framework import generics
@@ -311,11 +312,21 @@ def following_info(request, userId):
 
 @api_view(["POST"])
 @permission_classes([])
+@ratelimit(key='post:username', rate='3/5m', block=False)
 def verify_otp(request):
     """
     Verify otp for email verification.
     """
     try:
+        was_limited = getattr(request, 'limited', False)
+        if was_limited:
+            info_logger.warn(f'Bad Request! Email verification limit exceed.')
+            return generic_response(
+                success=False,
+                message="Limit Exceed! Try Again After 5 Minutes.",
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         form = OtpValidationForm(request.data)
         if not form.is_valid():
             info_logger.warn('Field error / Bad Request from anonymous user for email verification')
