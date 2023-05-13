@@ -3,6 +3,7 @@ from uuid import UUID
 from celery import shared_task 
 
 from django.conf import settings
+from django.utils import timezone 
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
@@ -16,8 +17,9 @@ def email_verification(user_id:UUID) -> None:
     """
     Send email to user with otp for email verification.
     """
-    otp = generate_otp_and_save(user_id)
     user = User.objects.get(id=user_id)
+    otp = generate_otp_and_save(user)
+    if not otp: return
     username = user.username
     receiver = user.email
     
@@ -35,12 +37,13 @@ def email_verification(user_id:UUID) -> None:
     email_receive.send()
 
 
-def generate_otp_and_save(user_id:UUID) -> int:
+def generate_otp_and_save(user:User) -> int|None:
     """
     Generate 4 digit otp and save. 
     """
     otp = random.randint(1000, 9999)
-    result, is_created = Otp.objects.get_or_create(user_id_id=user_id)
+    result, is_created = Otp.objects.get_or_create(user_id=user)
+    if not is_created and result.expire_at > timezone.now(): return None
     result.otp = otp
     result.expire_at=get_otp_expiry_date()
     result.save()

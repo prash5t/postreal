@@ -22,3 +22,10 @@ class OtpValidationForm(forms.Form):
     """
     otp = forms.IntegerField(required=True)
     username = forms.CharField(max_length=50, required=True) 
+
+
+class NotificationDeviceForm(forms.Form):
+    """
+    Field validation for notification token of device.
+    """
+    notification_token = forms.CharField(max_length=350, required=True) 

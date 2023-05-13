@@ -70,3 +70,8 @@ class Otp(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
     otp = models.SmallIntegerField(default=0000, editable=False, db_index=True)
     expire_at = models.DateTimeField(default=get_otp_expiry_date(), editable=False) 
+
+
+class NotificationDevice(TimeStamp):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
+    notification_token = models.CharField(max_length=350, editable=False)
