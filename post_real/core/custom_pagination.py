@@ -23,6 +23,6 @@ class CommentListPagination(PageNumberPagination):
     """
     Custom PageNumberPagination for listing comments with page size 20. 
     """
-    page_size = 2
+    page_size = 15
     page_size_query_param = 'page_size'  
     max_page_size = 15

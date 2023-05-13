@@ -6,13 +6,13 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 
-from .models import Connection, User, Otp
+from .models import Connection, User, Otp, NotificationDevice
 from post_real.core.custom_pagination import UserListPagination
 from post_real.services.tasks.send_email import email_verification
 from post_real.core.query_helper import get_following_user, paginate_queryset
-from post_real.core.validation_form import UserIdValidationForm, OtpValidationForm
 from .serializers import UserSerializer, UserListSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
+from post_real.core.validation_form import UserIdValidationForm, OtpValidationForm, NotificationDeviceForm
 
 
 class UserRegisterView(generics.CreateAPIView):
@@ -318,7 +318,7 @@ def verify_otp(request):
     try:
         form = OtpValidationForm(request.data)
         if not form.is_valid():
-            info_logger.warn(f'Field error / Bad Request from anonymous user for email verification')
+            info_logger.warn('Field error / Bad Request from anonymous user for email verification')
             return log_field_error(form.errors)
         
         otp = form.cleaned_data['otp']
@@ -341,6 +341,29 @@ def verify_otp(request):
                 message="Bad Request! Email Verification Failed. Try again with new otp.",
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    except Exception as err:
+        return log_exception(err)
+
+
+@api_view(['POST'])
+def set_notification_token(request):
+    try:
+        user = request.user
+        form = NotificationDeviceForm(request.data)
+        if not form.is_valid():
+            info_logger.warn(f'Field error / Bad Request from {user} while setting notification token.')
+            return log_field_error(form.errors) 
+        
+        notification_token= form.cleaned_data['notification_token'] 
+        
+        NotificationDevice.objects.update_or_create(user_id=user, defaults={'notification_token':notification_token})
+        info_logger.info(f'Device notification token setup success for user: {user}')
+        return generic_response(
+                    success=True,
+                    message="Notification Token Saved Successfully!",
+                    status=status.HTTP_200_OK
+                )
     
     except Exception as err:
         return log_exception(err)

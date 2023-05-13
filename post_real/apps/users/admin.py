@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserChangeForm
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, Connection, Otp
+from .models import User, Connection, Otp, NotificationDevice
 
 
 class UserAdmin(BaseUserAdmin):
@@ -38,3 +38,8 @@ class ConnectionAdmin(admin.ModelAdmin):
 @admin.register(Otp)
 class OtpAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_id', 'otp', "expire_at") 
+
+
+@admin.register(NotificationDevice)
+class NotificationDeviceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_id', 'notification_token')
