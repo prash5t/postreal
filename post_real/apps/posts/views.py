@@ -4,9 +4,11 @@ from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 
+
 from .models import Post, Like, Comment
 from post_real.apps.users.models import User
 from post_real.core.authorization import check_user_access_on_post
+from post_real.services.check_nsfw_content import check_explicit_image
 from .serializers import PostSerializer, LikeSerializer, CommentSerializer
 from post_real.core.query_helper import get_liked_post_of_user, paginate_queryset
 from post_real.core.validation_form import CommentValidationForm, UserIdValidationForm
@@ -37,12 +39,24 @@ class PostViewSet(viewsets.ModelViewSet):
 
             serializer = self.serializer_class(data=payload)
             if serializer.is_valid():
-                serializer.save()
+                instance = serializer.save()
 
-                info_logger.info(f'Post created: {serializer.data.get("id")}')
+                response, is_explicit = check_explicit_image(serializer.data["postPicUrl"])
+                if is_explicit:
+                    instance.delete() 
+                    info_logger.info(f'Post deleted: {serializer.data.get("id")} : due to explicit content from: {authenticated_user}, Post polarity:{response}') 
+                    return generic_response(
+                        success=False,
+                        message='Explicit Content Not Allowed!',
+                        data={},
+                        status=status.HTTP_406_NOT_ACCEPTABLE
+                    )
+
                 serialized_data = serializer.data
                 keys_to_remove = ["total_likes", "total_comments", "has_liked", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
+
+                info_logger.info(f'Post created: {serialized_data.get("id")}, Post polarity:{response}')
                 return generic_response(
                     success=True,
                     message='Post Created Successfully',

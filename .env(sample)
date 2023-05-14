@@ -32,3 +32,6 @@ PAPERTRAIL_PORT = "<papertrail_port>"
 # telegram bot configuration
 BOT_TOKEN = "<telegram_bot_token>"
 CHAT_ID = "<list_of_chat_ids>"
+
+# filter explicit/nsfw content 
+EDEN_AI_API_KEY = "<api_key>"

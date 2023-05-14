@@ -8,8 +8,9 @@ from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 
 from .models import Connection, User, Otp, NotificationDevice
+from post_real.core.tasks.send_email import email_verification
 from post_real.core.custom_pagination import UserListPagination
-from post_real.services.tasks.send_email import email_verification
+from post_real.services.check_nsfw_content import check_explicit_image
 from post_real.core.query_helper import get_following_user, paginate_queryset
 from .serializers import UserSerializer, UserListSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error
@@ -32,14 +33,26 @@ class UserRegisterView(generics.CreateAPIView):
 
             serializer = self.serializer_class(data=payload)
             if serializer.is_valid():
-                serializer.save()
-                email_verification.delay(user_id=serializer.data["id"])
+                instance = serializer.save()
+                
+                response, is_explicit = check_explicit_image(serializer.data["profilePicUrl"])
+                if is_explicit:
+                    instance.delete() 
+                    info_logger.info(f'User registration failed due to explicit content, Registration polarity:{response}') 
+                    return generic_response(
+                        success=False,
+                        message='Explicit Content Not Allowed!',
+                        data={},
+                        status=status.HTTP_406_NOT_ACCEPTABLE
+                    )
 
                 serialized_data = serializer.data
+                email_verification.delay(user_id=serialized_data["id"])
+                
                 keys_to_remove = ["followers", "following", "is_following", "urls"]
                 for key in keys_to_remove: serialized_data.pop(key)
 
-                info_logger.info(f'New user registered: {serialized_data.get("username")}')
+                info_logger.info(f'New user registered: {serialized_data.get("username")}, Registration polarity:{response}')
                 return generic_response(
                     success=True,
                     message='User Registered Successfully. Please verify your account with otp sent on your registered email.',

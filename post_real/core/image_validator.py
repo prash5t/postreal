@@ -36,14 +36,14 @@ def compress_image(image:ImageFieldFile) -> InMemoryUploadedFile:
             img.convert('RGB').save(buffer, format='JPEG', optimize=True, quality=50)
 
     # Compress the buffer using gzip
-    buffer.seek(0)
-    gzipped_buffer = gzip.compress(buffer.read())
+    # buffer.seek(0)
+    # gzipped_buffer = gzip.compress(buffer.read())
 
     # Create a new InMemoryUploadedFile instance with the compressed data
     compressed_image = InMemoryUploadedFile(
-        io.BytesIO(gzipped_buffer),  # The compressed data
+        buffer,  # The compressed data
         image.name,  # The original file name
-        image.name + '.gz',  # The new file name with .gz extension
+        image.name,  # The new file name with .gz extension
         image.content_type,  # The content type of the file
         None,  # The file size
         None,  # The charset (set to None for binary data)

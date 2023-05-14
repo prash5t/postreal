@@ -39,12 +39,21 @@ PAPERTRAIL_PORT = <papertrail_port>
 # telegram bot configuration
 BOT_TOKEN = <telegram_bot_token>
 CHAT_ID = <list_of_chat_ids>
+
+# edenai to filter explicit/nsfw content
+EDEN_AI_API_KEY = <api_key>
 ```
 
 - Run web service
 
 ```commandline
 sudo docker-compose up --build
+```
+
+- Run web service in daemon mode
+
+```commandline
+sudo docker-compose up --build -d
 ```
 
 - Create an admin user
