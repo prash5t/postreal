@@ -25,7 +25,6 @@ def check_explicit_image(imageUrl:str) -> Tuple[Dict[str, Any], bool]:
     is_explicit=False
     if response.status_code==200:
         data = response.json()
-        print(data)
         likelihood = data.get("amazon").get("nsfw_likelihood")
         if likelihood and (likelihood > 2): is_explicit = True
 
