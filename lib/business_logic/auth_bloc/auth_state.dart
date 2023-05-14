@@ -13,9 +13,18 @@ class LoggedOutState extends AuthState {}
 
 class LoggedInState extends AuthState {}
 
-class ErrorState extends AuthState {
-  final String? message;
-  ErrorState({required this.message});
+class MessageState extends AuthState {
+  final String message;
+  MessageState({required this.message});
   @override
   List<Object?> get props => [message];
+}
+
+class VerifyOTPState extends AuthState {
+  final String emailOrUserame;
+  final String password;
+
+  VerifyOTPState(this.emailOrUserame, this.password);
+  @override
+  List<Object?> get props => [emailOrUserame, password];
 }

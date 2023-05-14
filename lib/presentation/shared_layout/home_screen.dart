@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SearchScreen(
                 searchFeedScrollController: _searchFeedScroolController),
             const NotificationScreen(),
-            ProfileScreen(uIdOfProfileOwner: user.uid),
+            ProfileScreen(uIdOfProfileOwner: user.uid!),
           ],
         ),
       ),

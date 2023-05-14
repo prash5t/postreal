@@ -1,22 +1,29 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class User {
   final String email;
   final String username;
+  final String? password;
   final String bio;
-  final String uid;
-  final String profilePicUrl;
-  final List followers;
-  final List following;
+  final String? uid;
+  final String? profilePicUrl;
+  final File? profilePicFile;
+  final List? followers;
+  final List? following;
   final bool isVerified;
   const User(
       {required this.email,
       required this.username,
+      this.password,
       required this.bio,
-      required this.uid,
-      required this.profilePicUrl,
-      required this.followers,
-      required this.following,
+      this.uid,
+      this.profilePicUrl,
+      this.profilePicFile,
+      this.followers,
+      this.following,
       this.isVerified = false});
 
   Map<String, dynamic> toJson() => {
@@ -41,5 +48,20 @@ class User {
         followers: snap['followers'],
         following: snap['following'],
         isVerified: snap['isVerified']);
+  }
+
+  static fromJson(Map<String, dynamic> userMap) {
+    try {
+      return User(
+          uid: userMap['id'],
+          username: userMap['username'],
+          email: userMap['email'],
+          bio: userMap['bio'],
+          profilePicUrl: userMap['profilePicUrl'],
+          isVerified: userMap['is_verified']);
+    } catch (err) {
+      debugPrint("Deserializing User Catch: $err");
+      return null;
+    }
   }
 }

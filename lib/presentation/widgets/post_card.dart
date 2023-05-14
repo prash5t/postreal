@@ -78,7 +78,7 @@ class _PostCardState extends State<PostCard> {
             onDoubleTap: () async {
               bool isLikedOrUnliked = await FirestoreMethods().likeUnlikePost(
                   widget.postData.postId,
-                  user.uid,
+                  user.uid!,
                   widget.postData.likes,
                   widget.postData.uid,
                   widget.postData.postPicUrl);
@@ -156,7 +156,7 @@ class _PostCardState extends State<PostCard> {
                     onPressed: () async {
                       await FirestoreMethods().likeUnlikePost(
                           widget.postData.postId,
-                          user.uid,
+                          user.uid!,
                           widget.postData.likes,
                           widget.postData.uid,
                           widget.postData.postPicUrl);
@@ -175,7 +175,7 @@ class _PostCardState extends State<PostCard> {
                     commentsButtomSheet(
                         context: context,
                         post: widget.postData,
-                        currentUserId: user.uid);
+                        currentUserId: user.uid!);
                   },
                   icon: const Icon(Icons.comment_outlined)),
               // IconButton(
@@ -260,7 +260,7 @@ class _PostCardState extends State<PostCard> {
                     commentsButtomSheet(
                         context: context,
                         post: widget.postData,
-                        currentUserId: user.uid);
+                        currentUserId: user.uid!);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

@@ -7,11 +7,11 @@ abstract class AuthEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class InitialEvent extends AuthEvent {}
-
 class AuthCheckerEvent extends AuthEvent {}
 
 class LogoutClickedEvent extends AuthEvent {}
+
+class OTPVerifiedEvent extends AuthEvent {}
 
 class LoginClickedEvent extends AuthEvent {
   final String email;
@@ -23,15 +23,19 @@ class LoginClickedEvent extends AuthEvent {
 }
 
 class RegisterClickedEvent extends AuthEvent {
-  final String email;
-  final String username;
-  final String bio;
-  final String password;
-  final File profilePic;
+  final model.User personTryingToRegister;
 
-  const RegisterClickedEvent(
-      this.email, this.username, this.bio, this.password, this.profilePic);
+  const RegisterClickedEvent({required this.personTryingToRegister});
 
   @override
-  List<Object> get props => [email, username, bio, password, profilePic];
+  List<Object> get props => [personTryingToRegister];
+}
+
+class VerifyOTPClickedEvent extends AuthEvent {
+  final String emailOrUserame;
+  final String otp;
+
+  const VerifyOTPClickedEvent(this.emailOrUserame, this.otp);
+  @override
+  List<Object> get props => [emailOrUserame, otp];
 }

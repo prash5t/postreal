@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:postreal/data/auth_methods.dart';
 import 'package:postreal/data/models/user.dart' as model;
+import 'package:postreal/data/models/user_repo.dart';
+import 'package:postreal/data/repository/auth_repository.dart';
+import 'package:postreal/utils/shared_prefs_helper.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -14,24 +16,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckerEvent>(_authChecker);
     on<LoginClickedEvent>(_loginClick);
     on<LogoutClickedEvent>(_logoutClick);
-    on<InitialEvent>(_initialEvent);
     on<RegisterClickedEvent>(_registerClick);
+    on<OTPVerifiedEvent>(_otpVerifiedEvent);
   }
   final AuthMethods _authMethods = AuthMethods();
   model.User? _currentUser;
 
   model.User get getCurrentUser => _currentUser!;
 
-  // InitialEvent is usable to act as remover of error state once its delivered
-  // in the stream when we need to navigate to another screen
-  // example to register screen from login screen or vice versa
-  // if the last state was error state and when we navigate between the screens
-  // Error state will be provided bacause that last state was error state
-  // So triggering InitialEvent when we navigate from login to register or viceversa
-  // will bring LoggedOutState as the latest state.
-  FutureOr<void> _initialEvent(
-      InitialEvent initialEvent, Emitter<AuthState> emit) {
-    emit.call(LoggedOutState());
+  FutureOr<void> _otpVerifiedEvent(
+      OTPVerifiedEvent otpVerifiedEvent, Emitter<AuthState> emit) {
+    emit.call(LoggedInState());
   }
 
   FutureOr<void> _logoutClick(
@@ -47,12 +42,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit.call(AppOpeningState());
-    final currentUser = _authMethods.auth.currentUser;
-    if (currentUser != null) {
-      await _bringCurrentUserToGlobalSpace();
-      emit.call(LoggedInState());
-    } else {
+    final String? accessToken = await SharedPrefsHelper.getAccessToken();
+    final String? refreshToken = await SharedPrefsHelper.getRefreshToken();
+    if (accessToken == null || refreshToken == null) {
       emit.call(LoggedOutState());
+    } else {
+      emit.call(LoggedInState());
     }
   }
 
@@ -72,7 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit.call(LoggedInState());
     } else {
       emit.call(LoggedOutState());
-      emit.call(ErrorState(message: loginMsg));
+      emit.call(MessageState(message: loginMsg));
     }
   }
 
@@ -80,19 +75,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit.call(LoadingState());
 
-    final String registerMsg = await _authMethods.signupUser(
-        email: registerClickedEvent.email,
-        password: registerClickedEvent.password,
-        username: registerClickedEvent.username,
-        bio: registerClickedEvent.bio,
-        selfieFile: registerClickedEvent.profilePic);
+    UserRepo pendingUser = await AuthDataRepository.registerUser(
+        personTryingToRegister: registerClickedEvent.personTryingToRegister);
 
-    if (registerMsg == "success") {
-      await _bringCurrentUserToGlobalSpace();
-      emit.call(LoggedInState());
+    if (pendingUser.success) {
+      emit.call(VerifyOTPState(
+          registerClickedEvent.personTryingToRegister.email,
+          registerClickedEvent.personTryingToRegister.password!));
     } else {
-      // emit.call(LoggedOutState());
-      emit.call(ErrorState(message: registerMsg));
+      emit.call(MessageState(message: pendingUser.message));
     }
   }
 

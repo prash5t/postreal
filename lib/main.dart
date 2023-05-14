@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/business_logic/switch_theme_cubit/switch_theme_cubit.dart';
+import 'package:postreal/business_logic/verifyotp_cubit/verifyotp_cubit.dart';
 import 'package:postreal/my_keys.dart';
 import 'package:postreal/presentation/shared_layout/addphoto_screen.dart';
 import 'package:postreal/presentation/shared_layout/home_screen.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<VerifyOTPCubit>(create: (context) => VerifyOTPCubit()),
         BlocProvider<SwitchThemeCubit>(create: (context) => SwitchThemeCubit()),
         BlocProvider<AuthBloc>(
             create: (BuildContext context) =>
@@ -61,26 +63,10 @@ class MyApp extends StatelessWidget {
                           const AddPostScreen(),
                       AppRoutes.homescreen: (context) => const HomeScreen(),
                     },
-                    home: const AppEntry());
+                    home: const LoginScreen());
               },
             );
           }),
     );
-  }
-}
-
-class AppEntry extends StatelessWidget {
-  const AppEntry({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final authBlocState = Provider.of<AuthBloc>(context).state;
-    if (authBlocState is AppOpeningState) {
-      return const Material(child: Center(child: CircularProgressIndicator()));
-    }
-    if (authBlocState is LoggedInState) {
-      return const HomeScreen();
-    }
-    return const LoginScreen();
   }
 }

@@ -93,11 +93,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                       usersSnapshot.data!.docs[index]);
                                   return InkWell(
                                     onTap: () {
-                                      navigateToProfile(thisUser.uid);
+                                      navigateToProfile(thisUser.uid!);
                                     },
                                     child: ListTile(
                                       leading: UserDP(
-                                          dpUrl: thisUser.profilePicUrl,
+                                          dpUrl: thisUser.profilePicUrl!,
                                           isVerified: thisUser.isVerified),
                                       title: UsernameWidget(
                                           isVerified: thisUser.isVerified,
@@ -136,7 +136,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 postModalBottomSheet(
                                     context: context,
                                     post: post,
-                                    currentUserId: loggedInUser.uid);
+                                    currentUserId: loggedInUser.uid!);
                               },
                               child: Image.network(
                                 post.postPicUrl,

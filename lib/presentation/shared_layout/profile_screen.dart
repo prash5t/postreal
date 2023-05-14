@@ -86,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (loggedInUser.uid == widget.uIdOfProfileOwner) {
       isProfileOwner = true;
     }
-    if (loggedInUser.following.contains(widget.uIdOfProfileOwner)) {
+    if (loggedInUser.following!.contains(widget.uIdOfProfileOwner)) {
       alreadyFollowed = true;
     }
 
@@ -194,11 +194,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? _firestoreMethods.unFollowUser(
                                           stalkedPersonId:
                                               widget.uIdOfProfileOwner,
-                                          stalkerId: loggedInUser.uid)
+                                          stalkerId: loggedInUser.uid!)
                                       : _firestoreMethods.followUser(
                                           stalkedPersonId:
                                               widget.uIdOfProfileOwner,
-                                          stalkerId: loggedInUser.uid);
+                                          stalkerId: loggedInUser.uid!);
 
                                   await Provider.of<UserProvider>(context,
                                           listen: false)
@@ -265,7 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   postModalBottomSheet(
                                       context: context,
                                       post: post,
-                                      currentUserId: loggedInUser.uid);
+                                      currentUserId: loggedInUser.uid!);
                                 },
                                 child: Image(
                                   image: NetworkImage(

@@ -1,8 +1,7 @@
-#### @Flutter Branch
+#### @Flutter Branch that uses REST API instead of Firebase
 
 ###### Uses:
 
-- Firebase Authentication, Firestore, Storage
 - State Management: BLoC
 
 ###### Configs before running the app:

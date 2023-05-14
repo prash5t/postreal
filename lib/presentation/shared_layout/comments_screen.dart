@@ -59,7 +59,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     itemBuilder: (context, index) => CommentCard(
                           commentData:
                               Comment.fromSnap(snapshot.data!.docs[index]),
-                          loggedInUserId: user.uid,
+                          loggedInUserId: user.uid!,
                           postOwnerId: widget.postData.uid,
                           postId: widget.postData.postId,
                         ));
@@ -81,7 +81,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             padding: const EdgeInsets.only(left: 16, right: 8.0),
             child: Row(
               children: [
-                UserDP(dpUrl: user.profilePicUrl, isVerified: user.isVerified),
+                UserDP(dpUrl: user.profilePicUrl!, isVerified: user.isVerified),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 15, right: 8.0),
@@ -108,11 +108,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
                                                       widget.postData.postId,
                                                   text:
                                                       _commentField.text.trim(),
-                                                  commentatorId: user.uid,
+                                                  commentatorId: user.uid!,
                                                   posterId: widget.postData.uid,
                                                   username: user.username,
                                                   profilePicUrl:
-                                                      user.profilePicUrl,
+                                                      user.profilePicUrl!,
                                                   isVerified: user.isVerified,
                                                   postPicUrl: widget
                                                       .postData.postPicUrl);

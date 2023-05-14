@@ -5,4 +5,5 @@ class AppRoutes {
   static String homescreen = "/home";
   static String profilescreen = "/profile";
   static String addPostScreen = "/newpost";
+  static String verifyOTPScreen = "/verifyOTP";
 }
