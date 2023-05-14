@@ -3,7 +3,7 @@ from django.core.validators import FileExtensionValidator
 
 from post_real.apps.users.models import User
 from post_real.core.time_stamp_model import TimeStamp
-from post_real.core.image_size_validator import validate_image_size
+from post_real.core.image_validator import validate_image_size
 
 
 class Post(TimeStamp):

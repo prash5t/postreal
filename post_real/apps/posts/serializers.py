@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from .models import Post, Like, Comment
+from post_real.core.image_validator import compress_image
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -30,6 +32,11 @@ class PostSerializer(serializers.ModelSerializer):
             "urls",
         ]
         # extra_kwargs={"userId": {"write_only":True}}
+    
+    def create(self, validated_data):
+        # compress post image and create post.
+        validated_data['postPicUrl'] = compress_image(validated_data['postPicUrl'])
+        return super().create(validated_data)
     
     def get_total_likes(self, post):
         """

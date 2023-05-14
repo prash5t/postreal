@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from .models import  User, Connection
+from post_real.core.image_validator import compress_image
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,11 +30,15 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
         
     def create(self, validated_data):  
-        """
-        Validate data and create user.
-        """
+        #compress profile image and create user 
+        validated_data['profilePicUrl'] = compress_image(validated_data['profilePicUrl'])
         user = User.objects.create_user(**validated_data)
         return user
+
+    def update(self, instance, validated_data):
+        #compress profile image and update user 
+        validated_data['profilePicUrl'] = compress_image(validated_data['profilePicUrl'])
+        return super().update(instance, validated_data)
 
     def get_followers(self, user):
         """
