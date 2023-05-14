@@ -117,3 +117,7 @@ CHAT_ID = os.environ.get("CHAT_ID")
 # celery configuration 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_TIMEZONE = 'Asia/Kathmandu'
+
+
+# api key to filter explicit/nsfw image 
+EDEN_AI_API_KEY = os.environ.get('EDEN_AI_API_KEY')
