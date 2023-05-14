@@ -2,7 +2,7 @@
 
 import django.core.validators
 from django.db import migrations, models
-import post_real.core.image_size_validator
+import post_real.core.image_validator
 
 
 class Migration(migrations.Migration):
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                     models.ImageField(
                         upload_to="mediafiles/postPics/",
                         validators=[
-                            post_real.core.image_size_validator.validate_image_size,
+                            post_real.core.image_validator.validate_image_size,
                             django.core.validators.FileExtensionValidator(
                                 allowed_extensions=["jpeg", "jpg", "png"]
                             ),
