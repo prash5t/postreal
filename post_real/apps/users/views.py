@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 from .models import Connection, User, Otp, NotificationDevice
 from post_real.core.custom_pagination import UserListPagination
-from post_real.services.tasks.send_email import email_verification
+from post_real.core.tasks.send_email import email_verification
 from post_real.core.query_helper import get_following_user, paginate_queryset
 from .serializers import UserSerializer, UserListSerializer, FollowerSerializer, FollowingSerializer
 from post_real.core.log_and_response import generic_response, info_logger, log_exception, log_field_error

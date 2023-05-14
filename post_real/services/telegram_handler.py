@@ -1,6 +1,6 @@
 import logging
 
-from post_real.services.tasks.send_logs_to_telegram import log_info_on_telegram
+from post_real.core.tasks.send_logs_to_telegram import log_info_on_telegram
 
 
 class TelegramHandler(logging.Handler):

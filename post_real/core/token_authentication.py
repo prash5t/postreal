@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from post_real.core.log_and_response import generic_response
-from post_real.services.tasks.send_email import email_verification
+from post_real.core.tasks.send_email import email_verification
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
