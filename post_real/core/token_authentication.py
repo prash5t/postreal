@@ -1,3 +1,6 @@
+from django.db.models import Q
+from django.contrib.auth import get_user_model
+
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework_simplejwt.views import TokenViewBase
@@ -13,14 +16,27 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
     """
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
+        username = attrs["username"]
+        password = attrs["password"]
+        
+        UserModel = get_user_model()
+        try:
+            user = UserModel.objects.get(Q(email=username) | Q(username=username))
+        except UserModel.DoesNotExist:
+            raise serializers.ValidationError({
+                "message": "Invalid Username!"
+            })
+        if not user.check_password(password):
+            raise serializers.ValidationError({
+                "message": "Invalid Password!"
+            })
         if not user.is_email_verified:
             email_verification.delay(user_id=user.id)
             raise serializers.ValidationError({
-                "detail": "This account is not verified. Please verify your account with otp sent on your registered email."
+                "message": "This account is not verified. Please verify your account with otp sent on your registered email."
             })
-        return data
+        
+        return super().validate(attrs)
 
 
 class TokenObtainPairView(TokenViewBase):
