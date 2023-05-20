@@ -24,6 +24,7 @@ class UserAdmin(BaseUserAdmin):
     )
 
     list_display = ['id', 'username', 'is_verified', 'is_email_verified', 'last_login', 'date_joined', 'updated_at']
+    list_editable = ['is_verified', 'is_email_verified']
     search_fields = ('username', 'email')
     ordering = ['username', 'email']
 
