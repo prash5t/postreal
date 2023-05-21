@@ -57,18 +57,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit.call(LoadingState());
 
-    final String loginMsg = await _authMethods.loginUser(
-      loginClickedEvent.email,
-      loginClickedEvent.password,
-    );
+    Map<String, dynamic> loginAuthTokenResp =
+        await AuthDataRepository.getAuthToken(
+            loginClickedEvent.email, loginClickedEvent.password);
 
-    if (loginMsg == "success") {
-      await _bringCurrentUserToGlobalSpace();
+    if (loginAuthTokenResp['success']) {
       emit.call(LoggedInState());
-    } else {
-      emit.call(LoggedOutState());
-      emit.call(MessageState(message: loginMsg));
     }
+    // issue receiving tokens while logging in
+    else {
+      emit.call(MessageState(message: loginAuthTokenResp['message']));
+    }
+
+    // final String loginMsg = await _authMethods.loginUser(
+    //   loginClickedEvent.email,
+    //   loginClickedEvent.password,
+    // );
+
+    // if (loginMsg == "success") {
+    //   await _bringCurrentUserToGlobalSpace();
+    //   emit.call(LoggedInState());
+    // } else {
+    //   emit.call(LoggedOutState());
+    //   emit.call(MessageState(message: loginMsg));
+    // }
   }
 
   FutureOr<void> _registerClick(RegisterClickedEvent registerClickedEvent,

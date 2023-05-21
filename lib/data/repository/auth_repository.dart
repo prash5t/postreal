@@ -4,6 +4,7 @@ import 'package:postreal/data/data_provider/auth_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:postreal/data/models/user.dart';
 import 'package:postreal/data/models/user_repo.dart';
+import 'package:postreal/utils/shared_prefs_helper.dart';
 
 class AuthDataRepository {
   static Future<Map<String, dynamic>> getAuthToken(
@@ -13,6 +14,10 @@ class AuthDataRepository {
           await AuthDataProvider.getAuthTokenPostReq(emailOrUserame, password);
       final Map<String, dynamic> decodedResp = json.decode(rawResp.body);
       debugPrint("Get Auth Resp: $decodedResp");
+      if (decodedResp["success"]) {
+        await SharedPrefsHelper.setAccessToken(decodedResp['data']['access']);
+        await SharedPrefsHelper.setRefreshToken(decodedResp['data']['refresh']);
+      }
       return decodedResp;
     } catch (err) {
       debugPrint("Get Auth Catch: $err");

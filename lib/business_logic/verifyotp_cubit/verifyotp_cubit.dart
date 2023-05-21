@@ -4,7 +4,6 @@ import 'package:postreal/business_logic/auth_bloc/auth_bloc.dart';
 import 'package:postreal/data/models/user_repo.dart';
 import 'package:postreal/data/repository/auth_repository.dart';
 import 'package:postreal/main.dart';
-import 'package:postreal/utils/shared_prefs_helper.dart';
 
 part 'verifyotp_state.dart';
 
@@ -24,15 +23,16 @@ class VerifyOTPCubit extends Cubit<VerifyOTPState> {
           await AuthDataRepository.getAuthToken(emailOrUserame, password);
       // fyi: when tokens are received, save them to securestorage and navigate to home
       if (authTokenResp["success"]) {
-        await SharedPrefsHelper.setAccessToken(authTokenResp['data']['access']);
-        await SharedPrefsHelper.setRefreshToken(
-            authTokenResp['data']['refresh']);
         BlocProvider.of<AuthBloc>(navKey.currentContext!)
             .add(OTPVerifiedEvent());
-      } else {
+      }
+      // issue receiving access/refresh tokens
+      else {
         emit(MessageState(authTokenResp["message"]));
       }
-    } else {
+    }
+    // issue verifying otp
+    else {
       emit(MessageState(userVerifyingOTP.message));
     }
   }

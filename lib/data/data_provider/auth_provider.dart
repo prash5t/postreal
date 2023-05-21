@@ -38,8 +38,4 @@ class AuthDataProvider {
     return http.post(Uri.parse(APIConstants.getAuthToken),
         headers: APIConstants.headerWithoutToken, body: getAuthTokenBody);
   }
-
-  static Future<Map<String, dynamic>> signInPostReq() async {
-    return {};
-  }
 }
